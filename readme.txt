@@ -1,3 +1,0 @@
-Django
-Manual de instalación:
-
