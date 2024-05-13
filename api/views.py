@@ -110,3 +110,8 @@ def decrypt_password(encrypted_password):
     # Algoritmo César para desencriptar la contraseña
     decrypted_password = ''.join(chr((ord(char) - 3) % 256) for char in encrypted_password)
     return decrypted_password
+
+
+class LocalizacionViewSet(viewsets.ModelViewSet):
+    queryset = Localizacion.objects.all()
+    serializer_class = LocalizacionSerializer
