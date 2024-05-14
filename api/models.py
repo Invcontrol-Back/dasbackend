@@ -26,24 +26,13 @@ class Usuario(models.Model):
         db_table = 'usuario'
 
 
-class Localizacion(models.Model):
-    loc_id = models.AutoField(primary_key=True)
-    loc_nombre = models.CharField(max_length=30)
-    tipo = models.CharField(max_length=50)
-    loc_ubi = models.ForeignKey('Ubicacion', models.DO_NOTHING)
+class TipoUbicacion(models.Model):
+    tip_ubi_id = models.AutoField(primary_key=True)
+    tip_ubi_nombre = models.CharField(max_length=30)
 
     class Meta:
         managed = False
-        db_table = 'localizacion'
-
-class Ubicacion(models.Model):
-    ubi_id = models.AutoField(primary_key=True)
-    ubi_nombre = models.CharField(max_length=30)
-    ubi_blo = models.ForeignKey('bloque', models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'ubicacion'
+        db_table = 'tipo_ubicacion'
 
 class Bloque(models.Model):
     blo_id = models.AutoField(primary_key=True)
@@ -61,3 +50,15 @@ class Facultad(models.Model):
     class Meta:
         managed = False
         db_table = 'facultad'
+
+
+class Ubicacion(models.Model):
+    ubi_id = models.AutoField(primary_key=True)
+    ubi_nombre = models.CharField(max_length=30)
+    ubi_blo = models.ForeignKey(Bloque, models.DO_NOTHING)
+    ubi_tip_ubi = models.ForeignKey(TipoUbicacion, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'ubicacion'
+

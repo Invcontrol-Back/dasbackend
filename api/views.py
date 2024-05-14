@@ -112,6 +112,17 @@ def decrypt_password(encrypted_password):
     return decrypted_password
 
 
-class LocalizacionViewSet(viewsets.ModelViewSet):
-    queryset = Localizacion.objects.all()
-    serializer_class = LocalizacionSerializer
+class LaboratorioViewSet(viewsets.ModelViewSet):
+    queryset = Ubicacion.objects.all()
+    serializer_class = LaboratorioSerializer
+    
+    #Metodo para buscar por cedula
+    def retrieve(self, request, *args, **kwargs):
+        nombre_laboratorio = kwargs.get('pk').lower()
+        try:
+            laboratorio = Ubicacion.objects.get(ubi_nombre__iexact=nombre_laboratorio) 
+            serializer = self.get_serializer(laboratorio)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Ubicacion.DoesNotExist:
+            return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
