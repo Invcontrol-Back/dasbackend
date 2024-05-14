@@ -110,3 +110,19 @@ def decrypt_password(encrypted_password):
     # Algoritmo César para desencriptar la contraseña
     decrypted_password = ''.join(chr((ord(char) - 3) % 256) for char in encrypted_password)
     return decrypted_password
+
+
+class LaboratorioViewSet(viewsets.ModelViewSet):
+    queryset = Ubicacion.objects.all()
+    serializer_class = LaboratorioSerializer
+    
+    #Metodo para buscar por cedula
+    def retrieve(self, request, *args, **kwargs):
+        nombre_laboratorio = kwargs.get('pk').lower()
+        try:
+            laboratorio = Ubicacion.objects.get(ubi_nombre__iexact=nombre_laboratorio) 
+            serializer = self.get_serializer(laboratorio)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Ubicacion.DoesNotExist:
+            return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
