@@ -81,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'HOST': 'localhost',
         'PORT': '3306',
-        'NAME': 'invcontrolact',
+        'NAME': 'invcontrol',
         'USER': 'root',
         'PASSWORD':'',
         'OPTIONS':{
