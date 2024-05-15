@@ -6,3 +6,8 @@ class FacultadSerializer(serializers.ModelSerializer):
         model = Facultad
         fields = '__all__' 
 
+class BloqueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bloque
+        fields = '__all__' 
+

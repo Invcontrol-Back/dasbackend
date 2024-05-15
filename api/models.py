@@ -9,3 +9,12 @@ class Facultad(models.Model):
     class Meta:
         managed = False
         db_table = 'facultad' 
+
+class Bloque(models.Model):
+    blo_id  = models.AutoField(primary_key=True)
+    blo_nombre = models.CharField(max_length=30)
+    blo_fac = models.ForeignKey('Facultad', on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'bloque'
