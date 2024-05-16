@@ -7,7 +7,8 @@ class FacultadSerializer(serializers.ModelSerializer):
         fields = '__all__' 
 
 class BloqueSerializer(serializers.ModelSerializer):
+    fac_nombre = serializers.CharField(source='blo_fac.fac_nombre', read_only=True)
     class Meta:
         model = Bloque
-        fields = '__all__' 
+        fields = ['blo_id', 'blo_nombre', 'blo_fac', 'fac_nombre']
 

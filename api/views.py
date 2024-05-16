@@ -1,3 +1,4 @@
+from django.db.models import F
 from rest_framework import viewsets
 from .models import *
 from .serializer import *
@@ -7,6 +8,6 @@ class FacultadViewSet(viewsets.ModelViewSet):
     serializer_class = FacultadSerializer
 
 class BloqueViewSet(viewsets.ModelViewSet):
-    queryset = Bloque.objects.all()
+    queryset = Bloque.objects.annotate(fac_nombre=F('blo_fac__fac_nombre')).all()
     serializer_class = BloqueSerializer
 
