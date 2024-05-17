@@ -126,3 +126,6 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
+class SoftwareViewSet(viewsets.ModelViewSet):
+    queryset = Software.objects.all()
+    serializer_class = SoftwareSerializer
