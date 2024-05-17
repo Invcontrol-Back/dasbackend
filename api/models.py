@@ -62,3 +62,16 @@ class Ubicacion(models.Model):
         managed = False
         db_table = 'ubicacion'
 
+
+class Software(models.Model):
+    sof_id = models.AutoField(primary_key=True)
+    sof_nombre = models.CharField(max_length=30)
+    sof_version = models.CharField(max_length=30)
+    sof_tipo = models.CharField(max_length=30)
+    sof_duracion = models.CharField(max_length=30)
+    sof_descripcion = models.CharField(max_length=200)
+    sof_tip_ubi = models.ForeignKey('TipoUbicacion', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'software'
