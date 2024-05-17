@@ -19,3 +19,8 @@ class LaboratorioSerializer(serializers.ModelSerializer):
         model = Ubicacion
         fields = '__all__'  
  
+class SoftwareSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Software
+        fields = '__all__'  
+ 
