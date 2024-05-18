@@ -17,3 +17,9 @@ class TipoUbicacionSerializer(serializers.ModelSerializer):
         model = TipoUbicacion
         fields = '__all__'
 
+class SoftwareSerializer(serializers.ModelSerializer):
+    tip_ubi_nombre = serializers.CharField(source='sof_tip_ubi.tip_ubi_nombre', read_only=True)
+    class Meta:
+        model = Software
+        fields = ['sof_id','sof_nombre','sof_version','sof_tipo','sof_duracion','sof_descripcion','sof_tip_ubi','tip_ubi_nombre']
+
