@@ -19,3 +19,22 @@ class LaboratorioSerializer(serializers.ModelSerializer):
         model = Ubicacion
         fields = '__all__'  
  
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ComponenteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Componente
+        fields = '__all__'  
+
+
