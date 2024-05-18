@@ -11,3 +11,7 @@ class BloqueViewSet(viewsets.ModelViewSet):
     queryset = Bloque.objects.annotate(fac_nombre=F('blo_fac__fac_nombre')).all()
     serializer_class = BloqueSerializer
 
+class TipoUbicacionViewSet(viewsets.ModelViewSet):
+    queryset = TipoUbicacion.objects.all()
+    serializer_class = TipoUbicacionSerializer    
+

@@ -18,3 +18,11 @@ class Bloque(models.Model):
     class Meta:
         managed = False
         db_table = 'bloque'
+
+class TipoUbicacion(models.Model):
+    tip_ubi_id = models.AutoField(primary_key=True)
+    tip_ubi_nombre = models.CharField(max_length=30)
+
+    class Meta:
+        managed = False
+        db_table = 'tipo_ubicacion'

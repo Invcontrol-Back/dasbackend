@@ -11,4 +11,9 @@ class BloqueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bloque
         fields = ['blo_id', 'blo_nombre', 'blo_fac', 'fac_nombre']
+    
+class TipoUbicacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoUbicacion
+        fields = '__all__'
 
