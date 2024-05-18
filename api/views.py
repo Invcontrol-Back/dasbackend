@@ -118,7 +118,7 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
     
     #Metodo para buscar por cedula
     def retrieve(self, request, *args, **kwargs):
-        nombre_laboratorio = kwargs.get('pk').lower()
+        nombre_laboratorio = kwargs.get('pk')
         try:
             laboratorio = Ubicacion.objects.get(ubi_nombre__iexact=nombre_laboratorio) 
             serializer = self.get_serializer(laboratorio)
@@ -126,3 +126,27 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+class ComponenteViewSet(viewsets.ModelViewSet):
+    queryset = Componente.objects.all()
+    serializer_class = ComponenteSerializer
+    
