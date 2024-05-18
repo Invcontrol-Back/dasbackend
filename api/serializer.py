@@ -24,3 +24,10 @@ class SoftwareSerializer(serializers.ModelSerializer):
         model = Software
         fields = '__all__'  
  
+
+class ComponenteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Componente
+        fields = '__all__'  
+
+

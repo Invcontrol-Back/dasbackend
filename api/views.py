@@ -118,7 +118,7 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
     
     #Metodo para buscar por cedula
     def retrieve(self, request, *args, **kwargs):
-        nombre_laboratorio = kwargs.get('pk').lower()
+        nombre_laboratorio = kwargs.get('pk')
         try:
             laboratorio = Ubicacion.objects.get(ubi_nombre__iexact=nombre_laboratorio) 
             serializer = self.get_serializer(laboratorio)
@@ -129,3 +129,9 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
 class SoftwareViewSet(viewsets.ModelViewSet):
     queryset = Software.objects.all()
     serializer_class = SoftwareSerializer
+
+ 
+class ComponenteViewSet(viewsets.ModelViewSet):
+    queryset = Componente.objects.all()
+    serializer_class = ComponenteSerializer
+    

@@ -9,6 +9,7 @@ router.register(r'usuario',views.UsuarioViewSet)
 router.register(r'rol',views.RolViewSet)
 router.register(r'laboratorio',views.LaboratorioViewSet)
 router.register(r'software',views.SoftwareViewSet)
+router.register(r'componente',views.ComponenteViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
