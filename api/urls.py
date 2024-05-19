@@ -8,8 +8,11 @@ router = routers.DefaultRouter()
 router.register(r'usuario',views.UsuarioViewSet)
 router.register(r'rol',views.RolViewSet)
 router.register(r'laboratorio',views.LaboratorioViewSet)
-router.register(r'software',views.SoftwareViewSet)
 router.register(r'componente',views.ComponenteViewSet)
+router.register(r'facultad',views.FacultadViewSet)
+router.register(r'bloque',views.BloqueViewSet)
+router.register(r'tipoUbi',views.TipoUbicacionViewSet)
+router.register(r'software',views.SoftwareViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
