@@ -1,6 +1,27 @@
 from rest_framework import serializers
 from .models import *
 
+class RolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rol
+        fields = '__all__'  
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = '__all__'  
+
+
+class LaboratorioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ubicacion
+        fields = '__all__'  
+
+class ComponenteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Componente
+        fields = '__all__'  
+
 class FacultadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Facultad
@@ -22,4 +43,5 @@ class SoftwareSerializer(serializers.ModelSerializer):
     class Meta:
         model = Software
         fields = ['sof_id','sof_nombre','sof_version','sof_tipo','sof_duracion','sof_descripcion','sof_tip_ubi','tip_ubi_nombre']
+
 
