@@ -77,18 +77,19 @@ class UsuarioViewSet(viewsets.ModelViewSet):
  
 class LoginView(APIView):
     def post(self, request):
-        usu_nombres = request.data.get('usu_nombres')
+        usu_correo = request.data.get('usu_correo')
         usu_contrasenia_provided = request.data.get('usu_contrasenia')
 
         try:
             # Obtener el usuario de la base de datos
-            usuario = Usuario.objects.get(usu_nombres=usu_nombres)
+            usuario = Usuario.objects.get(usu_correo=usu_correo)
             
             # Desencriptar la contraseña almacenada en la base de datos
             usu_contrasenia_stored = decrypt_password(usuario.usu_contrasenia)
 
             # Verificar si la contraseña proporcionada coincide con la almacenada desencriptada
-            if usu_contrasenia_stored == usu_contrasenia_provided:
+            # verifica que este habilitado
+            if usu_contrasenia_stored == usu_contrasenia_provided and usuario.usu_habilitado == 1:
                 # Desencriptar la contraseña para devolverla en la respuesta
                 usuario.usu_contrasenia = usu_contrasenia_stored
                 serializer = UsuarioSerializer(usuario)
