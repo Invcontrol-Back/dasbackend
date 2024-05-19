@@ -143,3 +143,4 @@ class TipoUbicacionViewSet(viewsets.ModelViewSet):
 
 class SoftwareViewSet(viewsets.ModelViewSet):
     queryset = Software.objects.annotate(tip_ubi_nombre=F('sof_tip_ubi__tip_ubi_nombre')).all()
+    serializer_class = SoftwareSerializer

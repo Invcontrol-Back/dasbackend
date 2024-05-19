@@ -11,7 +11,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = '__all__'  
 
-
 class LaboratorioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ubicacion

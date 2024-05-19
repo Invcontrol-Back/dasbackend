@@ -24,22 +24,6 @@ class Usuario(models.Model):
         managed = False
         db_table = 'usuario'
 
-
-
-class Ubicacion(models.Model):
-    ubi_id = models.AutoField(primary_key=True)
-    ubi_nombre = models.CharField(max_length=30)
-    ubi_blo = models.ForeignKey(Bloque, models.DO_NOTHING)
-    ubi_tip_ubi = models.ForeignKey(TipoUbicacion, models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = 'ubicacion'
-
-
-
-
-
 class Dependencia(models.Model):
     dep_id = models.IntegerField(primary_key=True)
     dep_nombre = models.CharField(max_length=30, blank=True, null=True)
@@ -48,9 +32,6 @@ class Dependencia(models.Model):
     class Meta:
         managed = False
         db_table = 'dependencia'
-
-
-
 
 class Categoria(models.Model):
     cat_id = models.AutoField(primary_key=True)
@@ -61,9 +42,6 @@ class Categoria(models.Model):
         managed = False
         db_table = 'categoria'
 
-
-
-
 class Categoriadetalle(models.Model):
     det_cat_id = models.AutoField(primary_key=True)
     det_cat_nombre = models.CharField(max_length=30)
@@ -72,10 +50,6 @@ class Categoriadetalle(models.Model):
     class Meta:
         managed = False
         db_table = 'categoriadetalle'
-
-
-
-
 
 class Componente(models.Model):
     com_id = models.AutoField(primary_key=True)
@@ -132,3 +106,13 @@ class Software(models.Model):
     class Meta:
         managed = False
         db_table = 'software'
+
+class Ubicacion(models.Model):
+    ubi_id = models.AutoField(primary_key=True)
+    ubi_nombre = models.CharField(max_length=30)
+    ubi_blo = models.ForeignKey(Bloque, models.DO_NOTHING)
+    ubi_tip_ubi = models.ForeignKey(TipoUbicacion, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'ubicacion'
