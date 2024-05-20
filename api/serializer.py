@@ -12,9 +12,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 class LaboratorioSerializer(serializers.ModelSerializer):
+    blo_nombre = serializers.CharField(source='ubi_blo.blo_nombre', read_only=True)
+    tip_ubi_nombre = serializers.CharField(source='ubi_tip_ubi.tip_ubi_nombre', read_only=True)
     class Meta:
         model = Ubicacion
-        fields = '__all__'  
+        fields = ['ubi_id','ubi_nombre','ubi_blo','blo_nombre','ubi_tip_ubi','tip_ubi_nombre'] 
 
 class ComponenteSerializer(serializers.ModelSerializer):
     class Meta:
