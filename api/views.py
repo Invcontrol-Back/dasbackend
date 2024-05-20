@@ -1,13 +1,12 @@
+from django.db.models import F
 from rest_framework import viewsets
 from .serializer import *
 from rest_framework.views import APIView
-from .models import Usuario
+from .models import *
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password,check_password
 
- 
- 
 class RolViewSet(viewsets.ModelViewSet):
     queryset = Rol.objects.all()
     serializer_class = RolSerializer
@@ -78,18 +77,19 @@ class UsuarioViewSet(viewsets.ModelViewSet):
  
 class LoginView(APIView):
     def post(self, request):
-        usu_nombres = request.data.get('usu_nombres')
+        usu_correo = request.data.get('usu_correo')
         usu_contrasenia_provided = request.data.get('usu_contrasenia')
 
         try:
             # Obtener el usuario de la base de datos
-            usuario = Usuario.objects.get(usu_nombres=usu_nombres)
+            usuario = Usuario.objects.get(usu_correo=usu_correo)
             
             # Desencriptar la contraseña almacenada en la base de datos
             usu_contrasenia_stored = decrypt_password(usuario.usu_contrasenia)
 
             # Verificar si la contraseña proporcionada coincide con la almacenada desencriptada
-            if usu_contrasenia_stored == usu_contrasenia_provided:
+            # verifica que este habilitado
+            if usu_contrasenia_stored == usu_contrasenia_provided and usuario.usu_habilitado == 1:
                 # Desencriptar la contraseña para devolverla en la respuesta
                 usuario.usu_contrasenia = usu_contrasenia_stored
                 serializer = UsuarioSerializer(usuario)
@@ -126,12 +126,22 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
-class SoftwareViewSet(viewsets.ModelViewSet):
-    queryset = Software.objects.all()
-    serializer_class = SoftwareSerializer
-
- 
 class ComponenteViewSet(viewsets.ModelViewSet):
     queryset = Componente.objects.all()
     serializer_class = ComponenteSerializer
-    
+
+class FacultadViewSet(viewsets.ModelViewSet):
+    queryset = Facultad.objects.all()
+    serializer_class = FacultadSerializer
+
+class BloqueViewSet(viewsets.ModelViewSet):
+    queryset = Bloque.objects.annotate(fac_nombre=F('blo_fac__fac_nombre')).all()
+    serializer_class = BloqueSerializer
+
+class TipoUbicacionViewSet(viewsets.ModelViewSet):
+    queryset = TipoUbicacion.objects.all()
+    serializer_class = TipoUbicacionSerializer    
+
+class SoftwareViewSet(viewsets.ModelViewSet):
+    queryset = Software.objects.annotate(tip_ubi_nombre=F('sof_tip_ubi__tip_ubi_nombre')).all()
+    serializer_class = SoftwareSerializer
