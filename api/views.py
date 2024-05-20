@@ -113,7 +113,8 @@ def decrypt_password(encrypted_password):
 
 
 class LaboratorioViewSet(viewsets.ModelViewSet):
-    queryset = Ubicacion.objects.all()
+
+    queryset = Ubicacion.objects.annotate(blo_nombre=F('ubi_blo__blo_nombre'),tip_ubi_nombre=F('ubi_tip_ubi__tip_ubi_nombre')).all()
     serializer_class = LaboratorioSerializer
     
     #Metodo para buscar por cedula
