@@ -62,23 +62,26 @@ Istalar Django rest framework
 
 pip install djangorestframework
 
+### paso 10
+Istalar 
+pip install django-cors-headers
 
-### Paso 10 
+### Paso 11
 Configurar los campos de conexion con respecto a sus datos 
 
-#### Paso 10.1 
+#### Paso 11.1 
 - Ingresar a la carpeta ServiceInvControl
 - Ir al archivo settings.py
 - Buscar la configuracion DATABASES
 - Realizar los cambios conforme a sus campos
 
 
-### Paso 11
+### Paso 12
 Migrar los campos que se realizo una sola vez 
 
 python manage.py migrate
 
-### Paso 12 
+### Paso 13
 Ejecutar el servidor
 
 python manage.py runserver 
