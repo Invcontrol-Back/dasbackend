@@ -60,3 +60,13 @@ class ComponenteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Componente
         fields = '__all__'
+
+class LocalizacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Localizacion
+        fields = '__all__'
+
+class TecnologicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tecnologico
+        fields = '__all__'

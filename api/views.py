@@ -178,3 +178,15 @@ class ComponenteViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    
+class LocalizacionViewSet(viewsets.ModelViewSet):
+    queryset = Localizacion.objects.all()
+    serializer_class = LocalizacionSerializer
+
+class TecnologicoViewSet(viewsets.ModelViewSet):
+    queryset = Tecnologico.objects.all()
+    serializer_class = TecnologicoSerializer
+
+    def get_queryset(self):
+        return Tecnologico.objects.filter(tec_eliminado="no")

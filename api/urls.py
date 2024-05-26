@@ -15,7 +15,8 @@ router.register(r'software',views.SoftwareViewSet)
 router.register(r'categoria',views.CategoriaViewSet)
 router.register(r'detalleCategoria',views.DetalleCategoriaViewSet)
 router.register(r'dependencia',views.DependenciaViewSet)
-router.register(r'componente',views.ComponenteViewSet)
+router.register(r'localizacion',views.LocalizacionViewSet)
+router.register(r'tecnologico',views.TecnologicoViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
