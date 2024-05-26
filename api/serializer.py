@@ -61,6 +61,13 @@ class ComponenteSerializer(serializers.ModelSerializer):
         model = Componente
         fields = '__all__'
 
+class InmobiliarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Inmobiliario
+        fields = ['inm_id','inm_codigo','inm_categoria','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso']
+
+
+
 class LocalizacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Localizacion
