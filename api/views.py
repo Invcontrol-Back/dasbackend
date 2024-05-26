@@ -6,6 +6,7 @@ from .models import *
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password,check_password
+from django.db import connection
 
 class RolViewSet(viewsets.ModelViewSet):
     queryset = Rol.objects.all()
@@ -127,9 +128,6 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
-class ComponenteViewSet(viewsets.ModelViewSet):
-    queryset = Componente.objects.all()
-    serializer_class = ComponenteSerializer
 
 class FacultadViewSet(viewsets.ModelViewSet):
     queryset = Facultad.objects.all()
@@ -146,3 +144,37 @@ class TipoUbicacionViewSet(viewsets.ModelViewSet):
 class SoftwareViewSet(viewsets.ModelViewSet):
     queryset = Software.objects.annotate(tip_ubi_nombre=F('sof_tip_ubi__tip_ubi_nombre')).all()
     serializer_class = SoftwareSerializer
+
+class CategoriaViewSet(viewsets.ModelViewSet):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+
+    def get_queryset(self):
+        return Categoria.objects.filter(cat_eliminado="no")
+
+class DetalleCategoriaViewSet(viewsets.ModelViewSet):
+    queryset = DetalleCategoria.objects.all()
+    serializer_class = DetalleCategoriaSerializer
+
+    def get_queryset(self):
+        return DetalleCategoria.objects.filter(det_cat_eliminado="no",det_cat_cat__cat_eliminado="no")
+    
+class DependenciaViewSet(viewsets.ModelViewSet):
+    queryset = Dependencia.objects.all()
+    serializer_class = DependenciaSerializer
+
+class ComponenteViewSet(viewsets.ModelViewSet):
+    queryset = Componente.objects.all()
+    serializer_class = ComponenteSerializer
+
+    def get_queryset(self):
+        return Componente.objects.filter(com_eliminado="no")
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            with connection.cursor() as cursor:
+                cursor.callproc('eliminarComponente', [instance.com_id])
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
