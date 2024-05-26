@@ -17,6 +17,8 @@ router.register(r'detalleCategoria',views.DetalleCategoriaViewSet)
 router.register(r'dependencia',views.DependenciaViewSet)
 router.register(r'componente',views.ComponenteViewSet)
 router.register(r'Inmoviliario',views.InmobiliarioViewSet)
+router.register(r'localizacion',views.LocalizacionViewSet)
+router.register(r'tecnologico',views.TecnologicoViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('login/', views.LoginView.as_view(), name='login'),

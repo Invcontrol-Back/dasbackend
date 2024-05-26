@@ -119,7 +119,6 @@ class Componente(models.Model):
         managed = False
         db_table = 'componente'
 
-
 class Inmobiliario(models.Model):
     inm_id = models.AutoField(primary_key=True)
     inm_codigo = models.CharField(unique=True, max_length=30)
@@ -136,7 +135,31 @@ class Inmobiliario(models.Model):
         managed = False
         db_table = 'inmobiliario'
 
+class Localizacion(models.Model):
+    loc_id = models.AutoField(primary_key=True)
+    loc_nombre = models.CharField(max_length=30)
+    loc_ubi = models.ForeignKey('Ubicacion', on_delete=models.DO_NOTHING)
+    loc_eliminado = models.CharField(max_length=20,default="no")
 
+    class Meta:
+        managed = False
+        db_table = 'localizacion'
 
+class Tecnologico(models.Model):
+    tec_id = models.AutoField(primary_key=True)
+    tec_codigo = models.CharField(max_length=30)
+    tec_serie = models.CharField(max_length=30)
+    tec_modelo = models.CharField(max_length=30)
+    tec_marca = models.CharField(max_length=30)
+    tec_ip = models.CharField(max_length=30, blank=True, null=True, default=None)
+    tec_anio_ingreso = models.CharField(max_length=30)
+    tec_encargado = models.ForeignKey('Usuario', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    tec_loc = models.ForeignKey('Localizacion', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    tec_cat = models.ForeignKey('Categoria', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    tec_dep = models.ForeignKey('Dependencia', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    tec_eliminado = models.CharField(max_length=20,default="no")
 
+    class Meta:
+        managed = False
+        db_table = 'tecnologico'
 
