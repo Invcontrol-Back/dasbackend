@@ -135,11 +135,6 @@ class Inmobiliario(models.Model):
         managed = False
         db_table = 'inmobiliario'
 
-
-
-
-
-
 class Localizacion(models.Model):
     loc_id = models.AutoField(primary_key=True)
     loc_nombre = models.CharField(max_length=30)
