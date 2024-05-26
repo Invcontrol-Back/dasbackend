@@ -28,46 +28,11 @@ class Dependencia(models.Model):
     dep_id = models.IntegerField(primary_key=True)
     dep_nombre = models.CharField(max_length=30, blank=True, null=True)
     dep_descripcion = models.CharField(max_length=30, blank=True, null=True)
+    dep_eliminado = models.CharField(max_length=20,default="no")
 
     class Meta:
         managed = False
         db_table = 'dependencia'
-
-class Categoria(models.Model):
-    cat_id = models.AutoField(primary_key=True)
-    cat_nombre = models.CharField(max_length=30)
-    cat_tipobien = models.CharField(db_column='cat_tipoBien', max_length=30)  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'categoria'
-
-class Categoriadetalle(models.Model):
-    det_cat_id = models.AutoField(primary_key=True)
-    det_cat_nombre = models.CharField(max_length=30)
-    det_cat_cat = models.ForeignKey(Categoria, models.DO_NOTHING, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'categoriadetalle'
-
-class Componente(models.Model):
-    com_id = models.AutoField(primary_key=True)
-    com_serie = models.CharField(max_length=30)
-    com_codigo_bien = models.CharField(max_length=30, blank=True, null=True)
-    com_codigo_uta = models.CharField(max_length=255)
-    com_det_cat = models.ForeignKey(Categoriadetalle, models.DO_NOTHING)
-    com_modelo = models.CharField(max_length=30, blank=True, null=True)
-    com_marca = models.CharField(max_length=30, blank=True, null=True)
-    com_caracteristica = models.CharField(max_length=30)
-    com_dep = models.ForeignKey('Dependencia', models.DO_NOTHING, blank=True, null=True)
-    com_anio_ingreso = models.TextField(blank=True, null=True)  # This field type is a guess.
-    com_disponible = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'componente'
-
 
 class Facultad(models.Model):
     fac_id  = models.AutoField(primary_key=True)
@@ -116,3 +81,40 @@ class Ubicacion(models.Model):
     class Meta:
         managed = False
         db_table = 'ubicacion'
+
+class Categoria(models.Model):
+    cat_id = models.AutoField(primary_key=True)
+    cat_nombre = models.CharField(max_length=30)
+    cat_tipoBien = models.CharField(max_length=30)
+    cat_eliminado = models.CharField(max_length=20,default="no")
+
+    class Meta:
+        managed = False
+        db_table = 'categoria'
+
+class DetalleCategoria(models.Model):
+    det_cat_id = models.AutoField(primary_key=True)
+    det_cat_nombre = models.CharField(max_length=30)
+    det_cat_cat = models.ForeignKey(Categoria,models.DO_NOTHING)
+    det_cat_eliminado = models.CharField(max_length=20,default="no")
+
+    class Meta:
+        managed = False
+        db_table = 'categoriadetalle'
+
+class Componente(models.Model):
+    com_id = models.AutoField(primary_key=True)
+    com_serie = models.CharField(max_length=30)
+    com_codigo_bien = models.CharField(max_length=30, default=None, null=True, blank=True)
+    com_codigo_uta = models.CharField(max_length=30,default=None,null=True,blank=True)
+    com_det_cat = models.ForeignKey('DetalleCategoria', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    com_modelo = models.CharField(max_length=30)
+    com_marca = models.CharField(max_length=30)
+    com_caracteristica = models.CharField(max_length=30)
+    com_dep = models.ForeignKey('Dependencia', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    com_anio_ingreso = models.CharField(max_length=30)
+    com_eliminado = models.CharField(max_length=30,default="no")
+
+    class Meta:
+        managed = False
+        db_table = 'componente'

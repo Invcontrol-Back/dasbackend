@@ -18,10 +18,6 @@ class LaboratorioSerializer(serializers.ModelSerializer):
         model = Ubicacion
         fields = ['ubi_id','ubi_nombre','ubi_blo','blo_nombre','ubi_tip_ubi','tip_ubi_nombre'] 
 
-class ComponenteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Componente
-        fields = '__all__'  
 
 class FacultadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,4 +41,22 @@ class SoftwareSerializer(serializers.ModelSerializer):
         model = Software
         fields = ['sof_id','sof_nombre','sof_version','sof_tipo','sof_duracion','sof_descripcion','sof_tip_ubi','tip_ubi_nombre']
 
+class CategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Categoria
+        fields = '__all__'
 
+class DetalleCategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetalleCategoria
+        fields = '__all__'
+
+class DependenciaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dependencia
+        fields = '__all__'
+
+class ComponenteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Componente
+        fields = '__all__'
