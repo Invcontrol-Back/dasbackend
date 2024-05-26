@@ -118,3 +118,25 @@ class Componente(models.Model):
     class Meta:
         managed = False
         db_table = 'componente'
+
+
+class Inmobiliario(models.Model):
+    inm_id = models.AutoField(primary_key=True)
+    inm_codigo = models.CharField(unique=True, max_length=30)
+    inm_categoria = models.CharField(max_length=30)
+    inm_dep = models.ForeignKey(Dependencia, models.DO_NOTHING, blank=True, null=True)
+    inm_serie = models.CharField(max_length=30, blank=True, null=True)
+    inm_modelo = models.CharField(max_length=30, blank=True, null=True)
+    inm_marca = models.CharField(max_length=30, blank=True, null=True)
+    inm_encargado = models.ForeignKey('Usuario', models.DO_NOTHING, blank=True, null=True)
+    inm_anio_ingreso = models.TextField(blank=True, null=True)  # This field type is a guess.
+    inm_eliminado = models.CharField(max_length=20)
+
+    class Meta:
+        managed = False
+        db_table = 'inmobiliario'
+
+
+
+
+
