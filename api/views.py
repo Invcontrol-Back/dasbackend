@@ -16,6 +16,13 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     
+    def get_queryset(self):
+        # Filtrar para obtener solo los usuarios habilitados
+        return Usuario.objects.filter(usu_habilitado=1)
+
+    def perform_create(self, serializer):
+        serializer.save(usu_habilitado="1")
+
     #Metodo para insertar
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -34,17 +41,24 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-    #Metodo para dar de baja
+    #Metodo para dar de baja y dar de baja al usuario en Inmobiliario
+
     def destroy(self, request, *args, **kwargs):
+        cedula = kwargs.get('pk')
+        try:
+            # Buscar el usuario por su cédula
+            usuario = Usuario.objects.get(usu_cedula=cedula)
+            usuario.usu_habilitado = 0
+            usuario.save()
             
-            cedula = kwargs.get('pk')
-            try:
-                usuario = Usuario.objects.get(usu_cedula=cedula)
-                usuario.usu_habilitado = 0
-                usuario.save()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except Usuario.DoesNotExist:
-                return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
+            Inmobiliario.objects.filter(inm_encargado_id=usuario.usu_id).update(inm_encargado_id=None)
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Usuario.DoesNotExist:
+            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+    
     #Metodo para buscar por cedula
     def retrieve(self, request, *args, **kwargs):
         cedula = kwargs.get('pk')
@@ -56,6 +70,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         except Usuario.DoesNotExist:
             return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
+  
+    
     # Método para actualizar
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -96,7 +112,8 @@ class LoginView(APIView):
                 serializer = UsuarioSerializer(usuario)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response({'error': 'Usuario o contraseña incorrectos'}, status=status.HTTP_401_UNAUTHORIZED)
+
+                return Response({'error': 'Usuario o contraseña incorrectos '}, status=status.HTTP_401_UNAUTHORIZED)
         
         except Usuario.DoesNotExist:
             return Response({'error': 'Usuario o contraseña incorrectos'}, status=status.HTTP_401_UNAUTHORIZED)
