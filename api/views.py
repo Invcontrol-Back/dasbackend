@@ -190,3 +190,12 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Tecnologico.objects.filter(tec_eliminado="no")
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            with connection.cursor() as cursor:
+                cursor.callproc('eliminarTecnologico', [instance.tec_id])
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
