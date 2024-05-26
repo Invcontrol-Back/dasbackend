@@ -12,14 +12,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 class LaboratorioSerializer(serializers.ModelSerializer):
+    blo_nombre = serializers.CharField(source='ubi_blo.blo_nombre', read_only=True)
+    tip_ubi_nombre = serializers.CharField(source='ubi_tip_ubi.tip_ubi_nombre', read_only=True)
     class Meta:
         model = Ubicacion
-        fields = '__all__'  
+        fields = ['ubi_id','ubi_nombre','ubi_blo','blo_nombre','ubi_tip_ubi','tip_ubi_nombre'] 
 
-class ComponenteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Componente
-        fields = '__all__'  
 
 class FacultadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,5 +40,31 @@ class SoftwareSerializer(serializers.ModelSerializer):
     class Meta:
         model = Software
         fields = ['sof_id','sof_nombre','sof_version','sof_tipo','sof_duracion','sof_descripcion','sof_tip_ubi','tip_ubi_nombre']
+
+class CategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Categoria
+        fields = '__all__'
+
+class DetalleCategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetalleCategoria
+        fields = '__all__'
+
+class DependenciaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dependencia
+        fields = '__all__'
+
+class ComponenteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Componente
+        fields = '__all__'
+
+
+class InmobiliarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Inmobiliario
+        fields = ['inm_id','inm_codigo','inm_categoria','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso']
 
 
