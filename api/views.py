@@ -249,7 +249,7 @@ class LocalizacionViewSet(viewsets.ModelViewSet):
     serializer_class = LocalizacionSerializer
 
 class TecnologicoViewSet(viewsets.ModelViewSet):
-    queryset = Tecnologico.objects.all()
+    queryset = Tecnologico.objects.annotate(usu_nombres=F('tec_encargado__usu_nombres'),cat_nombre=F('tec_cat__cat_nombre'),dep_nombre=F('tec_dep__dep_nombre'),loc_nombre=F('tec_loc__loc_nombre')).all()
     serializer_class = TecnologicoSerializer
 
     def get_queryset(self):
