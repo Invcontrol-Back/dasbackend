@@ -163,3 +163,15 @@ class Tecnologico(models.Model):
         managed = False
         db_table = 'tecnologico'
 
+class DetalleTecnologico(models.Model):
+    det_tec_id = models.AutoField(primary_key=True)
+    det_tec_tec = models.ForeignKey('Tecnologico', on_delete=models.DO_NOTHING)
+    det_tec_com_adquirido = models.ForeignKey('Componente', on_delete=models.DO_NOTHING, related_name='adquirido', null=True, blank=True, default=None)
+    det_tec_com_uso = models.ForeignKey('Componente', on_delete=models.DO_NOTHING, related_name='uso', null=True, blank=True, default=None)
+    det_tec_descripcion_repotencia = models.CharField(max_length=30, null=True, blank=True, default=None)
+    det_tec_estado_repotencia = models.CharField(max_length=30, default=0)
+    det_tec_eliminado = models.CharField(max_length=20, default="no")
+
+    class Meta:
+        managed = False
+        db_table = 'detalle_tecnologico'

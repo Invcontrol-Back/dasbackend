@@ -263,3 +263,21 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)    
+        
+class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
+    queryset = DetalleTecnologico.objects.all()
+    serializer_class = DetalleTecnologicoSerializer
+
+
+class ComponenteDetalleView(APIView):
+    def get(self, request):
+        parametro = self.request.query_params.get('parametro', None)
+        
+        if parametro is not None:
+            with connection.cursor() as cursor:
+                cursor.execute("CALL obtenerComponentesTecnologicos(%s)", [parametro])
+                columns = [col[0] for col in cursor.description]
+                results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                return Response(results)
+        else:
+            return Response({"error": "Parámetro 'parametro' no proporcionado."})

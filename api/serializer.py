@@ -67,7 +67,6 @@ class InmobiliarioSerializer(serializers.ModelSerializer):
         fields = ['inm_id','inm_codigo','inm_categoria','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso']
 
 
-
 class LocalizacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Localizacion
@@ -81,3 +80,8 @@ class TecnologicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tecnologico
         fields = ['tec_id','tec_codigo','tec_serie','tec_modelo','tec_marca','tec_ip','tec_anio_ingreso','tec_encargado','tec_loc','tec_cat','tec_dep','tec_eliminado','usu_nombres','cat_nombre','dep_nombre','loc_nombre']
+
+class DetalleTecnologicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetalleTecnologico
+        fields = '__all__'
