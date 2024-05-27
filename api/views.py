@@ -67,7 +67,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
             serializer = self.get_serializer(usuario)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Usuario.DoesNotExist:
+        except Usuario.DoesNotExist:    
             return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
   
@@ -159,15 +159,37 @@ class TipoUbicacionViewSet(viewsets.ModelViewSet):
     serializer_class = TipoUbicacionSerializer    
 
 class SoftwareViewSet(viewsets.ModelViewSet):
-    queryset = Software.objects.annotate(tip_ubi_nombre=F('sof_tip_ubi__tip_ubi_nombre')).all()
+    queryset = Software.objects.all()
     serializer_class = SoftwareSerializer
+
+    
+    def get_queryset(self):
+        return Software.objects.filter(sof_eliminado="no")
+
+
+    def perform_create(self, serializer):
+        serializer.save(sof_eliminado="no")
+
+    def destroy(self, request, *args, **kwargs):
+            
+        id = kwargs.get('pk')
+        try:
+            software = Software.objects.get(sof_id=id)
+            software.sof_eliminado = "si"
+            software.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Software.DoesNotExist:
+            return Response({'error': 'Software no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
 
     def get_queryset(self):
-        return Categoria.objects.filter(cat_eliminado="no")
+        return Categoria.objects.filter(sof_eliminado="no")
 
 class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     queryset = DetalleCategoria.objects.all()

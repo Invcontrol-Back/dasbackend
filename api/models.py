@@ -67,6 +67,7 @@ class Software(models.Model):
     sof_duracion = models.CharField(max_length=30)
     sof_descripcion = models.CharField(max_length=200)
     sof_tip_ubi = models.ForeignKey('TipoUbicacion', models.DO_NOTHING)
+    sof_eliminado = models.CharField(max_length=20)
 
     class Meta:
         managed = False
