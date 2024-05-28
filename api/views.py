@@ -132,16 +132,50 @@ def decrypt_password(encrypted_password):
 
 class LaboratorioViewSet(viewsets.ModelViewSet):
 
-    queryset = Ubicacion.objects.annotate(blo_nombre=F('ubi_blo__blo_nombre'),tip_ubi_nombre=F('ubi_tip_ubi__tip_ubi_nombre')).all()
+    queryset = Ubicacion.objects.all()
     serializer_class = LaboratorioSerializer
     
-    #Metodo para buscar por cedula
+    def perform_create(self, serializer):
+        serializer.save(ubi_eliminado="no")
+
+    def get_queryset(self):
+        return Ubicacion.objects.filter(ubi_eliminado="no")
+
+    #Metodo para buscar por laboratorio
     def retrieve(self, request, *args, **kwargs):
         nombre_laboratorio = kwargs.get('pk')
         try:
             laboratorio = Ubicacion.objects.get(ubi_nombre__iexact=nombre_laboratorio) 
             serializer = self.get_serializer(laboratorio)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except Ubicacion.DoesNotExist:
+            return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+    # Método para actualizar por ubi_id
+    def update(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        try:
+            laboratorio = Ubicacion.objects.get(pk=pk)
+            serializer = self.get_serializer(laboratorio, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Ubicacion.DoesNotExist:
+            return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Método para eliminar por ubi_id
+    def destroy(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        try:
+            laboratorio = Ubicacion.objects.get(pk=pk)
+            laboratorio.ubi_eliminado = "si"
+            laboratorio.save()
+            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
+            Localizacion.objects.filter(loc_ubi_id=laboratorio.ubi_id).update(loc_ubi_id=None)
+
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         

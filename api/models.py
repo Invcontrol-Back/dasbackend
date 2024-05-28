@@ -85,6 +85,17 @@ class Ubicacion(models.Model):
         managed = False
         db_table = 'ubicacion'
 
+class Localizacion(models.Model):
+    loc_id = models.AutoField(primary_key=True)
+    loc_nombre = models.CharField(max_length=30)
+    loc_ubi = models.ForeignKey('Ubicacion', models.DO_NOTHING)
+    loc_eliminado = models.CharField(max_length=20)
+
+    class Meta:
+        managed = False
+        db_table = 'localizacion'
+
+
 class Categoria(models.Model):
     cat_id = models.AutoField(primary_key=True)
     cat_nombre = models.CharField(max_length=30)
