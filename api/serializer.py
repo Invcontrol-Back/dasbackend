@@ -68,3 +68,9 @@ class InmobiliarioSerializer(serializers.ModelSerializer):
         fields = ['inm_id','inm_codigo','inm_categoria','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso']
 
 
+class UbicacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ubicacion
+        fields = ['ubi_id','ubi_nombre','ubi_blo_id','ubi_tip_ubi_id']
+
+                          

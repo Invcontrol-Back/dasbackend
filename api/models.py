@@ -46,7 +46,8 @@ class Bloque(models.Model):
     blo_id  = models.AutoField(primary_key=True)
     blo_nombre = models.CharField(max_length=30)
     blo_fac = models.ForeignKey('Facultad', on_delete=models.CASCADE, blank=True, null=True)
-
+    blo_eliminado = models.CharField(max_length=20)
+    
     class Meta:
         managed = False
         db_table = 'bloque'
@@ -78,6 +79,7 @@ class Ubicacion(models.Model):
     ubi_nombre = models.CharField(max_length=30)
     ubi_blo = models.ForeignKey(Bloque, models.DO_NOTHING)
     ubi_tip_ubi = models.ForeignKey(TipoUbicacion, models.DO_NOTHING)
+    ubi_eliminado = models.CharField(max_length=20)
 
     class Meta:
         managed = False

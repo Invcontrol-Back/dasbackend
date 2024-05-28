@@ -151,8 +151,31 @@ class FacultadViewSet(viewsets.ModelViewSet):
     serializer_class = FacultadSerializer
 
 class BloqueViewSet(viewsets.ModelViewSet):
-    queryset = Bloque.objects.annotate(fac_nombre=F('blo_fac__fac_nombre')).all()
+    queryset = Bloque.objects.all()
     serializer_class = BloqueSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(blo_eliminado="no")
+
+    def get_queryset(self):
+        return Bloque.objects.filter(blo_eliminado="no")
+
+
+    def destroy(self, request, *args, **kwargs):
+        id = kwargs.get('pk')
+        try:
+            # Buscar el usuario por su cédula
+            bloque = Bloque.objects.get(blo_id=id)
+            bloque.blo_eliminado = "si"
+            bloque.save()
+            
+            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
+            Ubicacion.objects.filter(ubi_blo_id=bloque.blo_id).update(ubi_blo_id=None)
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Bloque.DoesNotExist:
+            return Response({'error': 'Bloque no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class TipoUbicacionViewSet(viewsets.ModelViewSet):
     queryset = TipoUbicacion.objects.all()
