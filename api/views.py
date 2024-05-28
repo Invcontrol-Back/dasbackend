@@ -249,7 +249,7 @@ class LocalizacionViewSet(viewsets.ModelViewSet):
     serializer_class = LocalizacionSerializer
 
 class TecnologicoViewSet(viewsets.ModelViewSet):
-    queryset = Tecnologico.objects.all()
+    queryset = Tecnologico.objects.annotate(usu_nombres=F('tec_encargado__usu_nombres'),cat_nombre=F('tec_cat__cat_nombre'),dep_nombre=F('tec_dep__dep_nombre'),loc_nombre=F('tec_loc__loc_nombre')).all()
     serializer_class = TecnologicoSerializer
 
     def get_queryset(self):
@@ -263,3 +263,21 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)    
+        
+class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
+    queryset = DetalleTecnologico.objects.all()
+    serializer_class = DetalleTecnologicoSerializer
+
+
+class ComponenteDetalleView(APIView):
+    def get(self, request):
+        parametro = self.request.query_params.get('parametro', None)
+        
+        if parametro is not None:
+            with connection.cursor() as cursor:
+                cursor.execute("CALL obtenerComponentesTecnologicos(%s)", [parametro])
+                columns = [col[0] for col in cursor.description]
+                results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                return Response(results)
+        else:
+            return Response({"error": "Parámetro 'parametro' no proporcionado."})

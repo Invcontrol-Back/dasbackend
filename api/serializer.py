@@ -67,13 +67,21 @@ class InmobiliarioSerializer(serializers.ModelSerializer):
         fields = ['inm_id','inm_codigo','inm_categoria','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso']
 
 
-
 class LocalizacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Localizacion
         fields = '__all__'
 
 class TecnologicoSerializer(serializers.ModelSerializer):
+    usu_nombres = serializers.CharField(source='tec_encargado.usu_nombres', read_only=True)
+    cat_nombre = serializers.CharField(source='tec_cat.cat_nombre', read_only=True)
+    dep_nombre = serializers.CharField(source='tec_dep.dep_nombre', read_only=True)
+    loc_nombre = serializers.CharField(source='tec_loc.loc_nombre', read_only=True)
     class Meta:
         model = Tecnologico
+        fields = ['tec_id','tec_codigo','tec_serie','tec_modelo','tec_marca','tec_ip','tec_anio_ingreso','tec_encargado','tec_loc','tec_cat','tec_dep','tec_eliminado','usu_nombres','cat_nombre','dep_nombre','loc_nombre']
+
+class DetalleTecnologicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetalleTecnologico
         fields = '__all__'
