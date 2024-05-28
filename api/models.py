@@ -46,7 +46,8 @@ class Bloque(models.Model):
     blo_id  = models.AutoField(primary_key=True)
     blo_nombre = models.CharField(max_length=30)
     blo_fac = models.ForeignKey('Facultad', on_delete=models.CASCADE, blank=True, null=True)
-
+    blo_eliminado = models.CharField(max_length=20)
+    
     class Meta:
         managed = False
         db_table = 'bloque'
@@ -67,6 +68,7 @@ class Software(models.Model):
     sof_duracion = models.CharField(max_length=30)
     sof_descripcion = models.CharField(max_length=200)
     sof_tip_ubi = models.ForeignKey('TipoUbicacion', models.DO_NOTHING)
+    sof_eliminado = models.CharField(max_length=20)
 
     class Meta:
         managed = False
@@ -77,10 +79,22 @@ class Ubicacion(models.Model):
     ubi_nombre = models.CharField(max_length=30)
     ubi_blo = models.ForeignKey(Bloque, models.DO_NOTHING)
     ubi_tip_ubi = models.ForeignKey(TipoUbicacion, models.DO_NOTHING)
+    ubi_eliminado = models.CharField(max_length=20)
 
     class Meta:
         managed = False
         db_table = 'ubicacion'
+
+class Localizacion(models.Model):
+    loc_id = models.AutoField(primary_key=True)
+    loc_nombre = models.CharField(max_length=30)
+    loc_ubi = models.ForeignKey('Ubicacion', models.DO_NOTHING)
+    loc_eliminado = models.CharField(max_length=20)
+
+    class Meta:
+        managed = False
+        db_table = 'localizacion'
+
 
 class Categoria(models.Model):
     cat_id = models.AutoField(primary_key=True)

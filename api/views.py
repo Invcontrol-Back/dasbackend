@@ -67,7 +67,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
             serializer = self.get_serializer(usuario)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Usuario.DoesNotExist:
+        except Usuario.DoesNotExist:    
             return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
   
@@ -132,10 +132,16 @@ def decrypt_password(encrypted_password):
 
 class LaboratorioViewSet(viewsets.ModelViewSet):
 
-    queryset = Ubicacion.objects.annotate(blo_nombre=F('ubi_blo__blo_nombre'),tip_ubi_nombre=F('ubi_tip_ubi__tip_ubi_nombre')).all()
+    queryset = Ubicacion.objects.all()
     serializer_class = LaboratorioSerializer
     
-    #Metodo para buscar por cedula
+    def perform_create(self, serializer):
+        serializer.save(ubi_eliminado="no")
+
+    def get_queryset(self):
+        return Ubicacion.objects.filter(ubi_eliminado="no")
+
+    #Metodo para buscar por laboratorio
     def retrieve(self, request, *args, **kwargs):
         nombre_laboratorio = kwargs.get('pk')
         try:
@@ -145,29 +151,102 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
+    # Método para actualizar por ubi_id
+    def update(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        try:
+            laboratorio = Ubicacion.objects.get(pk=pk)
+            serializer = self.get_serializer(laboratorio, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Ubicacion.DoesNotExist:
+            return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Método para eliminar por ubi_id
+    def destroy(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        try:
+            laboratorio = Ubicacion.objects.get(pk=pk)
+            laboratorio.ubi_eliminado = "si"
+            laboratorio.save()
+            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
+            Localizacion.objects.filter(loc_ubi_id=laboratorio.ubi_id).update(loc_ubi_id=None)
+
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Ubicacion.DoesNotExist:
+            return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
 
 class FacultadViewSet(viewsets.ModelViewSet):
     queryset = Facultad.objects.all()
     serializer_class = FacultadSerializer
 
 class BloqueViewSet(viewsets.ModelViewSet):
-    queryset = Bloque.objects.annotate(fac_nombre=F('blo_fac__fac_nombre')).all()
+    queryset = Bloque.objects.all()
     serializer_class = BloqueSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(blo_eliminado="no")
+
+    def get_queryset(self):
+        return Bloque.objects.filter(blo_eliminado="no")
+
+
+    def destroy(self, request, *args, **kwargs):
+        id = kwargs.get('pk')
+        try:
+            # Buscar el usuario por su cédula
+            bloque = Bloque.objects.get(blo_id=id)
+            bloque.blo_eliminado = "si"
+            bloque.save()
+            
+            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
+            Ubicacion.objects.filter(ubi_blo_id=bloque.blo_id).update(ubi_blo_id=None)
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Bloque.DoesNotExist:
+            return Response({'error': 'Bloque no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class TipoUbicacionViewSet(viewsets.ModelViewSet):
     queryset = TipoUbicacion.objects.all()
     serializer_class = TipoUbicacionSerializer    
 
 class SoftwareViewSet(viewsets.ModelViewSet):
-    queryset = Software.objects.annotate(tip_ubi_nombre=F('sof_tip_ubi__tip_ubi_nombre')).all()
+    queryset = Software.objects.all()
     serializer_class = SoftwareSerializer
+
+    
+    def get_queryset(self):
+        return Software.objects.filter(sof_eliminado="no")
+
+
+    def perform_create(self, serializer):
+        serializer.save(sof_eliminado="no")
+
+    def destroy(self, request, *args, **kwargs):
+            
+        id = kwargs.get('pk')
+        try:
+            software = Software.objects.get(sof_id=id)
+            software.sof_eliminado = "si"
+            software.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Software.DoesNotExist:
+            return Response({'error': 'Software no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
 
     def get_queryset(self):
-        return Categoria.objects.filter(cat_eliminado="no")
+        return Categoria.objects.filter(sof_eliminado="no")
 
 class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     queryset = DetalleCategoria.objects.all()
