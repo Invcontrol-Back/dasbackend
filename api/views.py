@@ -136,12 +136,15 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
     serializer_class = LaboratorioSerializer
     
     def perform_create(self, serializer):
-        serializer.save(ubi_eliminado="no")
+        ubicacion = serializer.save(ubi_eliminado="no")
+        for i in range(1, 31):
+            nombre_localizacion = f"PC{i:02d}"
+            Localizacion.objects.create(loc_nombre=nombre_localizacion, loc_ubi=ubicacion)
+        return Response(serializer.data)
 
     def get_queryset(self):
         return Ubicacion.objects.filter(ubi_eliminado="no")
 
-    #Metodo para buscar por laboratorio
     def retrieve(self, request, *args, **kwargs):
         nombre_laboratorio = kwargs.get('pk')
         try:
@@ -151,7 +154,6 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
-    # Método para actualizar por ubi_id
     def update(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         try:
@@ -164,16 +166,18 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Método para eliminar por ubi_id
     def destroy(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         try:
             laboratorio = Ubicacion.objects.get(pk=pk)
             laboratorio.ubi_eliminado = "si"
             laboratorio.save()
-            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
-            Localizacion.objects.filter(loc_ubi_id=laboratorio.ubi_id).update(loc_ubi_id=None)
 
+            localizaciones = Localizacion.objects.filter(loc_ubi_id=laboratorio.ubi_id)
+            localizaciones.update(loc_eliminado = "si")
+
+            for localizacion in localizaciones:
+                Tecnologico.objects.filter(tec_loc_id=localizacion.loc_id).update(tec_loc_id=None)
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Ubicacion.DoesNotExist:
@@ -198,13 +202,18 @@ class BloqueViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         id = kwargs.get('pk')
         try:
-            # Buscar el usuario por su cédula
             bloque = Bloque.objects.get(blo_id=id)
             bloque.blo_eliminado = "si"
             bloque.save()
             
-            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
-            Ubicacion.objects.filter(ubi_blo_id=bloque.blo_id).update(ubi_blo_id=None)
+            ubicaciones = Ubicacion.objects.filter(ubi_blo_id=bloque.blo_id)
+            ubicaciones.update(ubi_eliminado="si")
+
+            for ubicacion in ubicaciones:
+                localizaciones = Localizacion.objects.filter(loc_ubi_id=ubicacion.ubi_id)
+                localizaciones.update(loc_eliminado="si")
+                for localizacion in localizaciones:
+                    Tecnologico.objects.filter(tec_loc_id=localizacion.loc_id).update(tec_loc_id=None)
             
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Bloque.DoesNotExist:
@@ -246,7 +255,7 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     serializer_class = CategoriaSerializer
 
     def get_queryset(self):
-        return Categoria.objects.filter(sof_eliminado="no")
+        return Categoria.objects.filter(cat_eliminado="no")
 
 class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     queryset = DetalleCategoria.objects.all()
@@ -327,6 +336,23 @@ class LocalizacionViewSet(viewsets.ModelViewSet):
     queryset = Localizacion.objects.all()
     serializer_class = LocalizacionSerializer
 
+    def get_queryset(self):
+        return Localizacion.objects.filter(loc_eliminado="no")
+    
+    def destroy(self, request, *args, **kwargs):
+        id = kwargs.get('pk')
+        try:
+            localizacion = Localizacion.objects.get(loc_id=id)
+            localizacion.loc_eliminado = "si"
+            localizacion.save()
+            
+            Tecnologico.objects.filter(tec_loc_id=localizacion.loc_id).update(tec_loc_id=None)
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Bloque.DoesNotExist:
+            return Response({'error': 'Bloque no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+
 class TecnologicoViewSet(viewsets.ModelViewSet):
     queryset = Tecnologico.objects.annotate(usu_nombres=F('tec_encargado__usu_nombres'),cat_nombre=F('tec_cat__cat_nombre'),dep_nombre=F('tec_dep__dep_nombre'),loc_nombre=F('tec_loc__loc_nombre')).all()
     serializer_class = TecnologicoSerializer
@@ -341,7 +367,41 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
                 cursor.callproc('eliminarTecnologico', [instance.tec_id])
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)    
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        id = kwargs.get('pk')
+        try:
+            tecnologico_anterior = Tecnologico.objects.get(tec_id=id, tec_eliminado="no")
+            nueva_etiqueta = request.data.get('tec_loc')
+
+            id_categoria = request.data.get('tec_cat')
+            categoria = Categoria.objects.get(cat_id=id_categoria)
+
+            id_dependencia = request.data.get('tec_dep')
+            dependencia = Dependencia.objects.get(dep_id=id_dependencia)
+
+            id_usuario = request.data.get('tec_encargado')
+            usuario = Usuario.objects.get(usu_id=id_usuario)
+
+            Tecnologico.objects.filter(tec_loc=nueva_etiqueta).update(tec_loc=None)
+            tecnologico_anterior.tec_loc_id = nueva_etiqueta
+            tecnologico_anterior.tec_anio_ingreso = request.data.get('tec_anio_ingreso')
+            tecnologico_anterior.tec_cat = categoria
+            tecnologico_anterior.tec_codigo = request.data.get('tec_codigo')
+            tecnologico_anterior.tec_dep = dependencia
+            tecnologico_anterior.tec_encargado = usuario
+            tecnologico_anterior.tec_ip = request.data.get('tec_ip')
+            tecnologico_anterior.tec_marca = request.data.get('tec_marca')
+            tecnologico_anterior.tec_modelo = request.data.get('tec_modelo')
+            tecnologico_anterior.tec_serie = request.data.get('tec_serie')
+            
+
+            tecnologico_anterior.save()
+            serializer = self.get_serializer(tecnologico_anterior)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Tecnologico.DoesNotExist:
+            return Response({'error': 'Tecnologico no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
 class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()

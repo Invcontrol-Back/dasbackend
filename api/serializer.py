@@ -84,8 +84,16 @@ class DetalleTecnologicoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LocalizacionSerializer(serializers.ModelSerializer):
+    ubi_nombre = serializers.CharField(source='loc_ubi.ubi_nombre',read_only=True)
+    blo_nombre = serializers.CharField(source='loc_ubi.ubi_blo.blo_nombre',read_only=True)
+    tec_codigo = serializers.SerializerMethodField()
+
     class Meta:
         model = Localizacion
-        fields = ['loc_id','loc_nombre','loc_ubi_id']
+        fields = ['loc_id','loc_nombre','loc_ubi','ubi_nombre','blo_nombre','tec_codigo']
+
+    def get_tec_codigo(self, obj):
+        tecnologicos = Tecnologico.objects.filter(tec_loc=obj)
+        return [tecnologico.tec_codigo for tecnologico in tecnologicos]
 
                           
