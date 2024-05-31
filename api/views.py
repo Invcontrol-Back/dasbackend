@@ -294,43 +294,16 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(inm_eliminado="no")
 
-    def retrieve(self, request, *args, **kwargs):
-        codigo = kwargs.get('pk')
-        try:
-            inmobiliario = Inmobiliario.objects.get(inm_codigo=codigo, inm_eliminado="no")
-            serializer = self.get_serializer(inmobiliario)
-            return Response(serializer.data)
-        except Inmobiliario.DoesNotExist:
-            return Response({'error': 'Inmobiliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
-
-
     def destroy(self, request, *args, **kwargs):
-            
         id = kwargs.get('pk')
         try:
-            inmoviliario = Inmobiliario.objects.get(inm_id=id)
-            inmoviliario.inm_eliminado = "si"
-            inmoviliario.save()
+            inmueble = Inmobiliario.objects.get(inm_id=id)
+            inmueble.inm_eliminado = "si"
+            inmueble.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Inmobiliario.DoesNotExist:
-            return Response({'error': 'Inmoviliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def update(self, request, *args, **kwargs):
-        codigo = kwargs.get('pk')
-        try:
-            inmobiliario = Inmobiliario.objects.get(inm_id=codigo, inm_eliminado="no")
-            new_encargado_id = request.data.get('inm_encargado_id')
-            
-            if new_encargado_id:
-                inmobiliario.inm_encargado_id = new_encargado_id
-                inmobiliario.save()
-                serializer = self.get_serializer(inmobiliario)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'Nuevo inm_encargado_id no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
-        except Inmobiliario.DoesNotExist:
-            return Response({'error': 'Inmobiliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)    
+        except Software.DoesNotExist:
+            return Response({'error': 'Inmobiliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+    
 
 class LocalizacionViewSet(viewsets.ModelViewSet):
     queryset = Localizacion.objects.all()
