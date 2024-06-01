@@ -7,9 +7,10 @@ class RolSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    rol_nombre = serializers.CharField(source='usu_rol.rol_nombre',read_only=True)
     class Meta:
         model = Usuario
-        fields = ['usu_id','usu_correo','usu_contrasenia','usu_cedula','usu_nombres','usu_apellidos','usu_rol']  
+        fields = ['usu_id','usu_correo','usu_contrasenia','usu_cedula','usu_nombres','usu_apellidos','usu_rol','usu_habilitado','usu_eliminado','rol_nombre']  
 
 class LaboratorioSerializer(serializers.ModelSerializer):
     blo_nombre = serializers.CharField(source='ubi_blo.blo_nombre', read_only=True)

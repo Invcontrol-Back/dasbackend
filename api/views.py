@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password,check_password
 from django.db import connection
+from rest_framework.decorators import action
 
 class RolViewSet(viewsets.ModelViewSet):
     queryset = Rol.objects.all()
@@ -17,13 +18,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioSerializer
     
     def get_queryset(self):
-        # Filtrar para obtener solo los usuarios habilitados
-        return Usuario.objects.filter(usu_habilitado=1)
+        return Usuario.objects.filter(usu_eliminado="no")
 
-    def perform_create(self, serializer):
-        serializer.save(usu_habilitado="1")
-
-    #Metodo para insertar
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
         password = data.get('usu_contrasenia')
@@ -41,44 +37,26 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-    #Metodo para dar de baja y dar de baja al usuario en Inmobiliario
 
     def destroy(self, request, *args, **kwargs):
-        cedula = kwargs.get('pk')
+        usu_id = kwargs.get('pk')
         try:
-            # Buscar el usuario por su cédula
-            usuario = Usuario.objects.get(usu_cedula=cedula)
-            usuario.usu_habilitado = 0
+            usuario = Usuario.objects.get(usu_id=usu_id)
+            usuario.usu_eliminado = "si"
             usuario.save()
             
-            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
             Inmobiliario.objects.filter(inm_encargado_id=usuario.usu_id).update(inm_encargado_id=None)
-            
+            Tecnologico.objects.filter(tec_encargado_id=usuario.usu_id).update(tec_encargado_id=None)
+
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Usuario.DoesNotExist:
             return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
     
-    #Metodo para buscar por cedula
-    def retrieve(self, request, *args, **kwargs):
-        cedula = kwargs.get('pk')
-        try:
-            usuario = Usuario.objects.get(usu_cedula=cedula)
-            usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
-            serializer = self.get_serializer(usuario)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Usuario.DoesNotExist:    
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-        
-  
-    
-    # Método para actualizar
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
-        cedula = kwargs.get('pk')  # Obtener la cédula del usuario de los parámetros de la URL
+        usu_id = kwargs.get('pk')
         try:
-            # Buscar el usuario por su cédula
-            instance = Usuario.objects.get(usu_cedula=cedula)
+            instance = Usuario.objects.get(usu_id=usu_id)
         except Usuario.DoesNotExist:
             return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -90,6 +68,39 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def buscar_por_cedula(self, request):
+        cedula = request.query_params.get('cedula', None)
+        if cedula is not None:
+            queryset = self.get_queryset().filter(usu_cedula__icontains=cedula)
+            for usuario in queryset:
+                usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar por cédula'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['patch'])
+    def actualizar_bienes_generales(self, request):
+        enc_anterior = request.data.get('encargado_anterior')
+        enc_nuevo = request.data.get('encargado_nuevo')
+
+        if not enc_anterior or not enc_nuevo:
+            return Response({'error': 'Debe proporcionar ambos valores: encargado_anterior y encargado_nuevo'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
+            inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
+
+            return Response({
+                'tecnologico_actualizado': tecnologico_actualizado,
+                'inmobiliario_actualizado': inmobiliario_actualizado
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
  
 class LoginView(APIView):

@@ -18,7 +18,8 @@ class Usuario(models.Model):
     usu_nombres = models.CharField(max_length=30)
     usu_apellidos = models.CharField(max_length=30)
     usu_rol = models.ForeignKey(Rol, models.DO_NOTHING)
-    usu_habilitado = models.IntegerField(blank=True, null=True)
+    usu_habilitado = models.CharField(max_length=30)
+    usu_eliminado = models.CharField(max_length=30,default="no")
 
     class Meta:
         managed = False
