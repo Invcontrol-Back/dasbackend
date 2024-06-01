@@ -314,6 +314,16 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Software.DoesNotExist:
             return Response({'error': 'Inmobiliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=False, methods=['get'])
+    def obtener_inmuebles_encargado(self, request):
+        encargado = request.query_params.get('encargado', None)
+        if encargado is not None:
+            inmuebles = Inmobiliario.objects.filter(inm_encargado=encargado)
+            serializer = self.get_serializer(inmuebles, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar inmuebles por encargado'}, status=status.HTTP_400_BAD_REQUEST)
     
 
 class LocalizacionViewSet(viewsets.ModelViewSet):
@@ -386,6 +396,16 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Tecnologico.DoesNotExist:
             return Response({'error': 'Tecnologico no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=False, methods=['get'])
+    def obtener_tecnologico_encargado(self, request):
+        encargado = request.query_params.get('encargado', None)
+        if encargado is not None:
+            tecnologico = Tecnologico.objects.filter(tec_encargado=encargado)
+            serializer = self.get_serializer(tecnologico, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
         
 class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()
