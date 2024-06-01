@@ -2,6 +2,7 @@ from django.db.models import F
 from rest_framework import viewsets
 from .serializer import *
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from .models import *
 from rest_framework.response import Response
 from rest_framework import status
@@ -453,3 +454,26 @@ class ComponenteDetalleView(APIView):
                 return Response(results)
         else:
             return Response({"error": "Parámetro 'parametro' no proporcionado."})
+        
+class ReporteDetalleView(viewsets.ModelViewSet):
+    queryset = DetalleTecnologico.objects.all()
+    serializer_class = DetalleTecnologicoSerializer
+
+    def execute_procedure(self, procedure_name, params):
+        with connection.cursor() as cursor:
+            cursor.callproc(procedure_name, params)
+            columns = [col[0] for col in cursor.description]
+            results = [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]
+        return results
+
+    @action(detail=False, methods=['get'])
+    def reporte_etiquetas(self, request):
+        ubicacion_id = request.query_params.get('ubicacion', None)
+        if ubicacion_id is not None:
+            results = self.execute_procedure('reporteEtiquetasLaboratorio', [ubicacion_id])
+            return Response(results)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
