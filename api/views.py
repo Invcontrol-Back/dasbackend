@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password,check_password
 from django.db import connection
+from rest_framework.decorators import action
 
 class RolViewSet(viewsets.ModelViewSet):
     queryset = Rol.objects.all()
@@ -17,13 +18,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioSerializer
     
     def get_queryset(self):
-        # Filtrar para obtener solo los usuarios habilitados
-        return Usuario.objects.filter(usu_habilitado=1)
+        return Usuario.objects.filter(usu_eliminado="no")
 
-    def perform_create(self, serializer):
-        serializer.save(usu_habilitado="1")
-
-    #Metodo para insertar
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
         password = data.get('usu_contrasenia')
@@ -41,44 +37,26 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-    #Metodo para dar de baja y dar de baja al usuario en Inmobiliario
 
     def destroy(self, request, *args, **kwargs):
-        cedula = kwargs.get('pk')
+        usu_id = kwargs.get('pk')
         try:
-            # Buscar el usuario por su cédula
-            usuario = Usuario.objects.get(usu_cedula=cedula)
-            usuario.usu_habilitado = 0
+            usuario = Usuario.objects.get(usu_id=usu_id)
+            usuario.usu_eliminado = "si"
             usuario.save()
             
-            # Buscar y actualizar los registros de Inmobiliario donde inm_encargado_id coincide con usu_id del usuario eliminado
             Inmobiliario.objects.filter(inm_encargado_id=usuario.usu_id).update(inm_encargado_id=None)
-            
+            Tecnologico.objects.filter(tec_encargado_id=usuario.usu_id).update(tec_encargado_id=None)
+
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Usuario.DoesNotExist:
             return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
     
-    #Metodo para buscar por cedula
-    def retrieve(self, request, *args, **kwargs):
-        cedula = kwargs.get('pk')
-        try:
-            usuario = Usuario.objects.get(usu_cedula=cedula)
-            usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
-            serializer = self.get_serializer(usuario)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Usuario.DoesNotExist:    
-            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-        
-  
-    
-    # Método para actualizar
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
-        cedula = kwargs.get('pk')  # Obtener la cédula del usuario de los parámetros de la URL
+        usu_id = kwargs.get('pk')
         try:
-            # Buscar el usuario por su cédula
-            instance = Usuario.objects.get(usu_cedula=cedula)
+            instance = Usuario.objects.get(usu_id=usu_id)
         except Usuario.DoesNotExist:
             return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -90,6 +68,39 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def buscar_por_cedula(self, request):
+        cedula = request.query_params.get('cedula', None)
+        if cedula is not None:
+            queryset = self.get_queryset().filter(usu_cedula__icontains=cedula)
+            for usuario in queryset:
+                usuario.usu_contrasenia = decrypt_password(usuario.usu_contrasenia)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar por cédula'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['patch'])
+    def actualizar_bienes_generales(self, request):
+        enc_anterior = request.data.get('encargado_anterior')
+        enc_nuevo = request.data.get('encargado_nuevo')
+
+        if not enc_anterior or not enc_nuevo:
+            return Response({'error': 'Debe proporcionar ambos valores: encargado_anterior y encargado_nuevo'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
+            inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
+
+            return Response({
+                'tecnologico_actualizado': tecnologico_actualizado,
+                'inmobiliario_actualizado': inmobiliario_actualizado
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
  
 class LoginView(APIView):
@@ -294,43 +305,26 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(inm_eliminado="no")
 
-    def retrieve(self, request, *args, **kwargs):
-        codigo = kwargs.get('pk')
-        try:
-            inmobiliario = Inmobiliario.objects.get(inm_codigo=codigo, inm_eliminado="no")
-            serializer = self.get_serializer(inmobiliario)
-            return Response(serializer.data)
-        except Inmobiliario.DoesNotExist:
-            return Response({'error': 'Inmobiliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
-
-
     def destroy(self, request, *args, **kwargs):
-            
         id = kwargs.get('pk')
         try:
-            inmoviliario = Inmobiliario.objects.get(inm_id=id)
-            inmoviliario.inm_eliminado = "si"
-            inmoviliario.save()
+            inmueble = Inmobiliario.objects.get(inm_id=id)
+            inmueble.inm_eliminado = "si"
+            inmueble.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Inmobiliario.DoesNotExist:
-            return Response({'error': 'Inmoviliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Software.DoesNotExist:
+            return Response({'error': 'Inmobiliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
-    def update(self, request, *args, **kwargs):
-        codigo = kwargs.get('pk')
-        try:
-            inmobiliario = Inmobiliario.objects.get(inm_id=codigo, inm_eliminado="no")
-            new_encargado_id = request.data.get('inm_encargado_id')
-            
-            if new_encargado_id:
-                inmobiliario.inm_encargado_id = new_encargado_id
-                inmobiliario.save()
-                serializer = self.get_serializer(inmobiliario)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': 'Nuevo inm_encargado_id no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
-        except Inmobiliario.DoesNotExist:
-            return Response({'error': 'Inmobiliario no encontrado'}, status=status.HTTP_404_NOT_FOUND)    
+    @action(detail=False, methods=['get'])
+    def obtener_inmuebles_encargado(self, request):
+        encargado = request.query_params.get('encargado', None)
+        if encargado is not None:
+            inmuebles = Inmobiliario.objects.filter(inm_encargado=encargado)
+            serializer = self.get_serializer(inmuebles, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar inmuebles por encargado'}, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class LocalizacionViewSet(viewsets.ModelViewSet):
     queryset = Localizacion.objects.all()
@@ -403,10 +397,49 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
         except Tecnologico.DoesNotExist:
             return Response({'error': 'Tecnologico no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
+    @action(detail=False, methods=['get'])
+    def obtener_tecnologico_encargado(self, request):
+        encargado = request.query_params.get('encargado', None)
+        if encargado is not None:
+            tecnologico = Tecnologico.objects.filter(tec_encargado=encargado)
+            serializer = self.get_serializer(tecnologico, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
+        
 class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()
     serializer_class = DetalleTecnologicoSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        componente_id = kwargs.get('pk')
+        if not componente_id:
+            return Response({'error': 'Debe proporcionar el ID del componente'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            detalle_tecnologico = DetalleTecnologico.objects.get(det_tec_com_uso=componente_id)
+            detalle_tecnologico.det_tec_com_uso = None
+            detalle_tecnologico.save()
+            return Response({'Componente': 'Componente quitado'}, status=status.HTTP_200_OK)
+        except DetalleTecnologico.DoesNotExist:
+            return Response({'error': 'Componente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    @action(detail=False, methods=['patch'])
+    def repotenciar(self, request):
+        componente = request.data.get('componente_id')
+        det_tec_id = request.data.get('det_tec_id')
+
+        if not componente or not det_tec_id:
+            return Response({'error': 'Debe proporcionar ambos valores'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            DetalleTecnologico.objects.filter(det_tec_com_uso_id=componente).update(det_tec_com_uso_id=None)
+            DetalleTecnologico.objects.filter(det_tec_id=det_tec_id).update(det_tec_com_uso_id=componente)
+            return Response({
+                'actualizad': 'actualizado',
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ComponenteDetalleView(APIView):
     def get(self, request):

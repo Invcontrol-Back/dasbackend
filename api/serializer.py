@@ -7,9 +7,10 @@ class RolSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    rol_nombre = serializers.CharField(source='usu_rol.rol_nombre',read_only=True)
     class Meta:
         model = Usuario
-        fields = ['usu_id','usu_correo','usu_contrasenia','usu_cedula','usu_nombres','usu_apellidos','usu_rol']  
+        fields = ['usu_id','usu_correo','usu_contrasenia','usu_cedula','usu_nombres','usu_apellidos','usu_rol','usu_habilitado','usu_eliminado','rol_nombre']  
 
 class LaboratorioSerializer(serializers.ModelSerializer):
     blo_nombre = serializers.CharField(source='ubi_blo.blo_nombre', read_only=True)
@@ -64,9 +65,13 @@ class ComponenteSerializer(serializers.ModelSerializer):
         fields = ['com_id','com_serie','com_codigo_bien','com_codigo_uta','com_modelo','com_marca','com_caracteristica','com_anio_ingreso','com_eliminado','com_det_cat','com_dep','dep_nombre','det_cat_nombre']
 
 class InmobiliarioSerializer(serializers.ModelSerializer):
+    usu_nombres = serializers.CharField(source='inm_encargado.usu_nombres',read_only=True)
+    cat_nombre = serializers.CharField(source='inm_cat.cat_nombre',read_only=True)
+    dep_nombre = serializers.CharField(source='inm_dep.dep_nombre',read_only=True)
+
     class Meta:
         model = Inmobiliario
-        fields = ['inm_id','inm_codigo','inm_categoria','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso']
+        fields = ['inm_id','inm_codigo','inm_cat','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso','usu_nombres','cat_nombre','dep_nombre']
 
 
 class TecnologicoSerializer(serializers.ModelSerializer):
