@@ -295,6 +295,19 @@ class ComponenteViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def obtenerComponentesEspecificos(self, request):
+        componente = request.query_params.get('componente', None)
+        if componente is not None:
+            if componente == 'null':
+                componente=0
+            tecnologico = Componente.objects.filter(com_id=componente)
+            serializer = self.get_serializer(tecnologico, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor'}, status=status.HTTP_400_BAD_REQUEST)     
+    
         
 class InmobiliarioViewSet(viewsets.ModelViewSet):
     queryset = Inmobiliario.objects.all()
@@ -474,6 +487,29 @@ class ReporteDetalleView(viewsets.ModelViewSet):
         ubicacion_id = request.query_params.get('ubicacion', None)
         if ubicacion_id is not None:
             results = self.execute_procedure('reporteEtiquetasLaboratorio', [ubicacion_id])
+            return Response(results)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_general(self, request):
+        results = self.execute_procedure('reporteTecnologicoGeneral',[])
+        return Response(results)
+    
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_encargado(self, request):
+        encargado_id = request.query_params.get('encargado', None)
+        if encargado_id is not None:
+            results = self.execute_procedure('ObtenerTecnologicosPorEncargado', [encargado_id])
+            return Response(results)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_ubicacion(self, request):
+        ubicacion_id = request.query_params.get('ubicacion', None)
+        if ubicacion_id is not None:
+            results = self.execute_procedure('ObtenerTecnologicosPorUbicacion', [ubicacion_id])
             return Response(results)
         else:
             return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
