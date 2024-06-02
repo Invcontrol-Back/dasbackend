@@ -194,7 +194,16 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-        
+
+    @action(detail=False, methods=['get'])
+    def obtener_laboratorio_bloque(self, request):
+        bloque_id = request.query_params.get('bloque', None)
+        if bloque_id is not None:
+            ubicaciones = Ubicacion.objects.filter(ubi_blo_id=bloque_id,ubi_eliminado='no')
+            serializer = self.get_serializer(ubicaciones, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)    
 
 class FacultadViewSet(viewsets.ModelViewSet):
     queryset = Facultad.objects.all()
