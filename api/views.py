@@ -369,6 +369,16 @@ class LocalizacionViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Bloque.DoesNotExist:
             return Response({'error': 'Bloque no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=False, methods=['get'])
+    def obtener_etiquetas_laboratorio(self, request):
+        ubicacion_id = request.query_params.get('ubicacion', None)
+        if ubicacion_id is not None:
+            etiquetas = Localizacion.objects.filter(loc_ubi_id=ubicacion_id,loc_eliminado='no')
+            serializer = self.get_serializer(etiquetas, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TecnologicoViewSet(viewsets.ModelViewSet):
