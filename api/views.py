@@ -454,12 +454,13 @@ class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     def repotenciar(self, request):
         componente = request.data.get('componente_id')
         det_tec_id = request.data.get('det_tec_id')
+        det_repotencia = request.data.get('det_repotencia')
 
         if not componente or not det_tec_id:
             return Response({'error': 'Debe proporcionar ambos valores'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             DetalleTecnologico.objects.filter(det_tec_com_uso_id=componente).update(det_tec_com_uso_id=None)
-            DetalleTecnologico.objects.filter(det_tec_id=det_tec_id).update(det_tec_com_uso_id=componente)
+            DetalleTecnologico.objects.filter(det_tec_id=det_tec_id).update(det_tec_com_uso_id=componente,det_tec_descripcion_repotencia = det_repotencia, det_tec_estado_repotencia = 1)
             return Response({
                 'actualizad': 'actualizado',
             }, status=status.HTTP_200_OK)
