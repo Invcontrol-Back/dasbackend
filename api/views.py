@@ -422,6 +422,16 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
         
+    @action(detail=False, methods=['get'])
+    def obtener_tecnologico_especifico(self, request):
+        tecnologico_cod = request.query_params.get('tecnologico', None)
+        if tecnologico_cod is not None and tecnologico_cod is not 'null':
+            tecnologico = Tecnologico.objects.filter(tec_codigo=tecnologico_cod)
+            serializer = self.get_serializer(tecnologico, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
+        
 class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()
     serializer_class = DetalleTecnologicoSerializer
