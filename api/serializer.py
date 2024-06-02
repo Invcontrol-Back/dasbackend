@@ -66,12 +66,13 @@ class ComponenteSerializer(serializers.ModelSerializer):
 
 class InmobiliarioSerializer(serializers.ModelSerializer):
     usu_nombres = serializers.CharField(source='inm_encargado.usu_nombres',read_only=True)
+    usu_apellidos = serializers.CharField(source='inm_encargado.usu_apellidos',read_only=True)
     cat_nombre = serializers.CharField(source='inm_cat.cat_nombre',read_only=True)
     dep_nombre = serializers.CharField(source='inm_dep.dep_nombre',read_only=True)
 
     class Meta:
         model = Inmobiliario
-        fields = ['inm_id','inm_codigo','inm_cat','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso','usu_nombres','cat_nombre','dep_nombre']
+        fields = ['inm_id','inm_codigo','inm_cat','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso','usu_nombres','usu_apellidos','cat_nombre','dep_nombre']
 
 
 class TecnologicoSerializer(serializers.ModelSerializer):
