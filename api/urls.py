@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework import routers
 from api import views
-from .views import LoginView
+from .views import *
 
 router = routers.DefaultRouter()
 #router.register(r'login', views.LoginView.as_view(), basename='login')
@@ -20,6 +20,8 @@ router.register(r'Inmobiliario',views.InmobiliarioViewSet)
 router.register(r'localizacion',views.LocalizacionViewSet)
 router.register(r'tecnologico',views.TecnologicoViewSet)
 router.register(r'detalletecnologico',views.DetalleTecnologicoViewSet)
+router.register(r'reporte', ReporteDetalleView, basename='reporte')
+
 urlpatterns = [
     path('', include(router.urls)),
     path('login/', views.LoginView.as_view(), name='login'),

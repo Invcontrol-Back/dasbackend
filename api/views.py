@@ -2,6 +2,7 @@ from django.db.models import F
 from rest_framework import viewsets
 from .serializer import *
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from .models import *
 from rest_framework.response import Response
 from rest_framework import status
@@ -294,6 +295,19 @@ class ComponenteViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def obtenerComponentesEspecificos(self, request):
+        componente = request.query_params.get('componente', None)
+        if componente is not None:
+            if componente == 'null':
+                componente=0
+            tecnologico = Componente.objects.filter(com_id=componente)
+            serializer = self.get_serializer(tecnologico, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor'}, status=status.HTTP_400_BAD_REQUEST)     
+    
         
 class InmobiliarioViewSet(viewsets.ModelViewSet):
     queryset = Inmobiliario.objects.all()
@@ -319,12 +333,13 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
     def obtener_inmuebles_encargado(self, request):
         encargado = request.query_params.get('encargado', None)
         if encargado is not None:
-            inmuebles = Inmobiliario.objects.filter(inm_encargado=encargado)
+            inmuebles = Inmobiliario.objects.filter(inm_encargado=encargado,inm_eliminado='no')
             serializer = self.get_serializer(inmuebles, many=True)
             return Response(serializer.data)
         else:
             return Response({'error': 'Debe proporcionar un valor para buscar inmuebles por encargado'}, status=status.HTTP_400_BAD_REQUEST)
     
+
 
 class LocalizacionViewSet(viewsets.ModelViewSet):
     queryset = Localizacion.objects.all()
@@ -407,6 +422,16 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
         
+    @action(detail=False, methods=['get'])
+    def obtener_tecnologico_especifico(self, request):
+        tecnologico_cod = request.query_params.get('tecnologico', None)
+        if tecnologico_cod is not None and tecnologico_cod is not 'null':
+            tecnologico = Tecnologico.objects.filter(tec_codigo=tecnologico_cod)
+            serializer = self.get_serializer(tecnologico, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
+        
 class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()
     serializer_class = DetalleTecnologicoSerializer
@@ -453,3 +478,49 @@ class ComponenteDetalleView(APIView):
                 return Response(results)
         else:
             return Response({"error": "Parámetro 'parametro' no proporcionado."})
+        
+class ReporteDetalleView(viewsets.ModelViewSet):
+    queryset = DetalleTecnologico.objects.all()
+    serializer_class = DetalleTecnologicoSerializer
+
+    def execute_procedure(self, procedure_name, params):
+        with connection.cursor() as cursor:
+            cursor.callproc(procedure_name, params)
+            columns = [col[0] for col in cursor.description]
+            results = [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]
+        return results
+
+    @action(detail=False, methods=['get'])
+    def reporte_etiquetas(self, request):
+        ubicacion_id = request.query_params.get('ubicacion', None)
+        if ubicacion_id is not None:
+            results = self.execute_procedure('reporteEtiquetasLaboratorio', [ubicacion_id])
+            return Response(results)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_general(self, request):
+        results = self.execute_procedure('reporteTecnologicoGeneral',[])
+        return Response(results)
+    
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_encargado(self, request):
+        encargado_id = request.query_params.get('encargado', None)
+        if encargado_id is not None:
+            results = self.execute_procedure('ObtenerTecnologicosPorEncargado', [encargado_id])
+            return Response(results)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_ubicacion(self, request):
+        ubicacion_id = request.query_params.get('ubicacion', None)
+        if ubicacion_id is not None:
+            results = self.execute_procedure('ObtenerTecnologicosPorUbicacion', [ubicacion_id])
+            return Response(results)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
