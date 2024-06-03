@@ -360,7 +360,15 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Debe proporcionar un valor para buscar inmuebles por encargado'}, status=status.HTTP_400_BAD_REQUEST)
     
-
+    @action(detail=False, methods=['get'])
+    def buscar_por_codigo(self, request):
+        codigo = request.query_params.get('codigo', None)
+        if codigo is not None:
+            queryset = Inmobiliario.objects.filter(inm_codigo__icontains=codigo)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar'}, status=status.HTTP_400_BAD_REQUEST)  
 
 class LocalizacionViewSet(viewsets.ModelViewSet):
     queryset = Localizacion.objects.all()
@@ -462,6 +470,16 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def buscar_por_codigo(self, request):
+        codigo = request.query_params.get('codigo', None)
+        if codigo is not None:
+            queryset = self.get_queryset().filter(tec_codigo__icontains=codigo)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar'}, status=status.HTTP_400_BAD_REQUEST) 
         
 class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()
