@@ -315,7 +315,19 @@ class ComponenteViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(tecnologico, many=True)
             return Response(serializer.data)
         else:
-            return Response({'error': 'Debe proporcionar un valor'}, status=status.HTTP_400_BAD_REQUEST)     
+            return Response({'error': 'Debe proporcionar un valor'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def buscar_por_codigo(self, request):
+        codigo = request.query_params.get('codigo', None)
+        if codigo is not None:
+            querysetBien = self.get_queryset().filter(com_codigo_bien__icontains=codigo)
+            querysetuta = self.get_queryset().filter(com_codigo_uta__icontains=codigo)
+            queryset = querysetBien | querysetuta
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar'}, status=status.HTTP_400_BAD_REQUEST)     
     
         
 class InmobiliarioViewSet(viewsets.ModelViewSet):
