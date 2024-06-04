@@ -118,7 +118,7 @@ class LoginView(APIView):
 
             # Verificar si la contraseña proporcionada coincide con la almacenada desencriptada
             # verifica que este habilitado
-            if usu_contrasenia_stored == usu_contrasenia_provided and usuario.usu_habilitado == 1:
+            if usu_contrasenia_stored == usu_contrasenia_provided and usuario.usu_habilitado == 'ACTIVO' and usuario.usu_eliminado=='no':
                 # Desencriptar la contraseña para devolverla en la respuesta
                 usuario.usu_contrasenia = usu_contrasenia_stored
                 serializer = UsuarioSerializer(usuario)
@@ -194,7 +194,16 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Ubicacion.DoesNotExist:
             return Response({'error': 'Laboratorio no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-        
+
+    @action(detail=False, methods=['get'])
+    def obtener_laboratorio_bloque(self, request):
+        bloque_id = request.query_params.get('bloque', None)
+        if bloque_id is not None:
+            ubicaciones = Ubicacion.objects.filter(ubi_blo_id=bloque_id,ubi_eliminado='no')
+            serializer = self.get_serializer(ubicaciones, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)    
 
 class FacultadViewSet(viewsets.ModelViewSet):
     queryset = Facultad.objects.all()
@@ -259,9 +268,6 @@ class SoftwareViewSet(viewsets.ModelViewSet):
         except Software.DoesNotExist:
             return Response({'error': 'Software no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
-
-
-
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
@@ -306,7 +312,19 @@ class ComponenteViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(tecnologico, many=True)
             return Response(serializer.data)
         else:
-            return Response({'error': 'Debe proporcionar un valor'}, status=status.HTTP_400_BAD_REQUEST)     
+            return Response({'error': 'Debe proporcionar un valor'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def buscar_por_codigo(self, request):
+        codigo = request.query_params.get('codigo', None)
+        if codigo is not None:
+            querysetBien = self.get_queryset().filter(com_codigo_bien__icontains=codigo)
+            querysetuta = self.get_queryset().filter(com_codigo_uta__icontains=codigo)
+            queryset = querysetBien | querysetuta
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar'}, status=status.HTTP_400_BAD_REQUEST)     
     
         
 class InmobiliarioViewSet(viewsets.ModelViewSet):
@@ -339,7 +357,15 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Debe proporcionar un valor para buscar inmuebles por encargado'}, status=status.HTTP_400_BAD_REQUEST)
     
-
+    @action(detail=False, methods=['get'])
+    def buscar_por_codigo(self, request):
+        codigo = request.query_params.get('codigo', None)
+        if codigo is not None:
+            queryset = Inmobiliario.objects.filter(inm_codigo__icontains=codigo)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar'}, status=status.HTTP_400_BAD_REQUEST)  
 
 class LocalizacionViewSet(viewsets.ModelViewSet):
     queryset = Localizacion.objects.all()
@@ -360,6 +386,16 @@ class LocalizacionViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Bloque.DoesNotExist:
             return Response({'error': 'Bloque no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=False, methods=['get'])
+    def obtener_etiquetas_laboratorio(self, request):
+        ubicacion_id = request.query_params.get('ubicacion', None)
+        if ubicacion_id is not None:
+            etiquetas = Localizacion.objects.filter(loc_ubi_id=ubicacion_id,loc_eliminado='no')
+            serializer = self.get_serializer(etiquetas, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TecnologicoViewSet(viewsets.ModelViewSet):
@@ -432,6 +468,16 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Debe proporcionar un valor para buscar tecnologico por encargado'}, status=status.HTTP_400_BAD_REQUEST)
         
+    @action(detail=False, methods=['get'])
+    def buscar_por_codigo(self, request):
+        codigo = request.query_params.get('codigo', None)
+        if codigo is not None:
+            queryset = self.get_queryset().filter(tec_codigo__icontains=codigo)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Debe proporcionar un valor para buscar'}, status=status.HTTP_400_BAD_REQUEST) 
+        
 class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()
     serializer_class = DetalleTecnologicoSerializer
@@ -454,12 +500,13 @@ class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
     def repotenciar(self, request):
         componente = request.data.get('componente_id')
         det_tec_id = request.data.get('det_tec_id')
+        det_repotencia = request.data.get('det_repotencia')
 
         if not componente or not det_tec_id:
             return Response({'error': 'Debe proporcionar ambos valores'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             DetalleTecnologico.objects.filter(det_tec_com_uso_id=componente).update(det_tec_com_uso_id=None)
-            DetalleTecnologico.objects.filter(det_tec_id=det_tec_id).update(det_tec_com_uso_id=componente)
+            DetalleTecnologico.objects.filter(det_tec_id=det_tec_id).update(det_tec_com_uso_id=componente,det_tec_descripcion_repotencia = det_repotencia, det_tec_estado_repotencia = 1)
             return Response({
                 'actualizad': 'actualizado',
             }, status=status.HTTP_200_OK)
@@ -524,3 +571,51 @@ class ReporteDetalleView(viewsets.ModelViewSet):
             return Response(results)
         else:
             return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def estadistica_software(self, request):
+        queryset = Software.objects.all()
+        
+        cantidad_activo = queryset.filter(sof_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(sof_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
+
+    @action(detail=False, methods=['get'])
+    def estadistica_tecnologico(self, request):
+        queryset = Tecnologico.objects.all()
+        
+        cantidad_activo = queryset.filter(tec_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(tec_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
+
+    @action(detail=False, methods=['get'])
+    def estadistica_inmueble(self, request):
+        queryset = Inmobiliario.objects.all()
+        
+        cantidad_activo = queryset.filter(inm_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(inm_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
+
+    @action(detail=False, methods=['get'])
+    def estadistica_usuario(self, request):
+        queryset = Usuario.objects.all()
+        
+        cantidad_activo = queryset.filter(usu_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(usu_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
