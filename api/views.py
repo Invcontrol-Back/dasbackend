@@ -118,7 +118,7 @@ class LoginView(APIView):
 
             # Verificar si la contraseña proporcionada coincide con la almacenada desencriptada
             # verifica que este habilitado
-            if usu_contrasenia_stored == usu_contrasenia_provided and usuario.usu_habilitado == 1:
+            if usu_contrasenia_stored == usu_contrasenia_provided and usuario.usu_habilitado == 'ACTIVO' and usuario.usu_eliminado=='no':
                 # Desencriptar la contraseña para devolverla en la respuesta
                 usuario.usu_contrasenia = usu_contrasenia_stored
                 serializer = UsuarioSerializer(usuario)
