@@ -268,9 +268,6 @@ class SoftwareViewSet(viewsets.ModelViewSet):
         except Software.DoesNotExist:
             return Response({'error': 'Software no encontrado'}, status=status.HTTP_404_NOT_FOUND)
         
-
-
-
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
@@ -574,3 +571,51 @@ class ReporteDetalleView(viewsets.ModelViewSet):
             return Response(results)
         else:
             return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def estadistica_software(self, request):
+        queryset = Software.objects.all()
+        
+        cantidad_activo = queryset.filter(sof_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(sof_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
+
+    @action(detail=False, methods=['get'])
+    def estadistica_tecnologico(self, request):
+        queryset = Tecnologico.objects.all()
+        
+        cantidad_activo = queryset.filter(tec_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(tec_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
+
+    @action(detail=False, methods=['get'])
+    def estadistica_inmueble(self, request):
+        queryset = Inmobiliario.objects.all()
+        
+        cantidad_activo = queryset.filter(inm_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(inm_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
+
+    @action(detail=False, methods=['get'])
+    def estadistica_usuario(self, request):
+        queryset = Usuario.objects.all()
+        
+        cantidad_activo = queryset.filter(usu_eliminado='no').count()
+        cantidad_inactivo = queryset.filter(usu_eliminado='si').count()
+        
+        return Response({
+            'cantidad_activo': cantidad_activo,
+            'cantidad_inactivo': cantidad_inactivo
+    })
