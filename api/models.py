@@ -147,12 +147,13 @@ class Componente(models.Model):
 class Inmobiliario(models.Model):
     inm_id = models.AutoField(primary_key=True)
     inm_codigo = models.CharField(unique=True, max_length=30)
-    inm_cat = models.ForeignKey(Categoria,models.DO_NOTHING, blank=True, null=True)
-    inm_dep = models.ForeignKey(Dependencia, models.DO_NOTHING, blank=True, null=True)
     inm_serie = models.CharField(max_length=30, blank=True, null=True)
     inm_modelo = models.CharField(max_length=30, blank=True, null=True)
-    inm_marca = models.CharField(max_length=30, blank=True, null=True)
+    inm_descripcion = models.CharField(max_length=50, blank=True, null=True )
+    inm_cat = models.ForeignKey(Categoria,models.DO_NOTHING, blank=True, null=True)
+    inm_dep = models.ForeignKey(Dependencia, models.DO_NOTHING, blank=True, null=True)
     inm_encargado = models.ForeignKey('Usuario', models.DO_NOTHING, blank=True, null=True)
+    inm_mar = models.ForeignKey('Marca',on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     inm_anio_ingreso = models.CharField(max_length=30,blank=True, null=True)
     inm_eliminado = models.CharField(max_length=20)
 
