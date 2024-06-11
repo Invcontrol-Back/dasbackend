@@ -117,6 +117,15 @@ class DetalleCategoria(models.Model):
         managed = False
         db_table = 'categoriadetalle'
 
+class Marca(models.Model):
+    mar_id = models.AutoField(primary_key=True)
+    mar_nombre = models.CharField(max_length=30)
+    mar_eliminado = models.CharField(max_length=20,default="no")
+
+    class Meta:
+        managed = False
+        db_table = 'marca'
+
 class Componente(models.Model):
     com_id = models.AutoField(primary_key=True)
     com_serie = models.CharField(max_length=30)
@@ -124,10 +133,11 @@ class Componente(models.Model):
     com_codigo_uta = models.CharField(max_length=30,default=None,null=True,blank=True)
     com_det_cat = models.ForeignKey('DetalleCategoria', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     com_modelo = models.CharField(max_length=30)
-    com_marca = models.CharField(max_length=30)
     com_caracteristica = models.CharField(max_length=30)
     com_dep = models.ForeignKey('Dependencia', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     com_anio_ingreso = models.CharField(max_length=30)
+    com_estado = models.CharField(max_length=30)
+    com_mar = models.ForeignKey('Marca',on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     com_eliminado = models.CharField(max_length=30,default="no")
 
     class Meta:
@@ -137,12 +147,13 @@ class Componente(models.Model):
 class Inmobiliario(models.Model):
     inm_id = models.AutoField(primary_key=True)
     inm_codigo = models.CharField(unique=True, max_length=30)
-    inm_cat = models.ForeignKey(Categoria,models.DO_NOTHING, blank=True, null=True)
-    inm_dep = models.ForeignKey(Dependencia, models.DO_NOTHING, blank=True, null=True)
     inm_serie = models.CharField(max_length=30, blank=True, null=True)
     inm_modelo = models.CharField(max_length=30, blank=True, null=True)
-    inm_marca = models.CharField(max_length=30, blank=True, null=True)
+    inm_descripcion = models.CharField(max_length=50, blank=True, null=True )
+    inm_cat = models.ForeignKey(Categoria,models.DO_NOTHING, blank=True, null=True)
+    inm_dep = models.ForeignKey(Dependencia, models.DO_NOTHING, blank=True, null=True)
     inm_encargado = models.ForeignKey('Usuario', models.DO_NOTHING, blank=True, null=True)
+    inm_mar = models.ForeignKey('Marca',on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     inm_anio_ingreso = models.CharField(max_length=30,blank=True, null=True)
     inm_eliminado = models.CharField(max_length=20)
 
@@ -165,13 +176,14 @@ class Tecnologico(models.Model):
     tec_codigo = models.CharField(max_length=30)
     tec_serie = models.CharField(max_length=30)
     tec_modelo = models.CharField(max_length=30)
-    tec_marca = models.CharField(max_length=30)
     tec_ip = models.CharField(max_length=30, blank=True, null=True, default=None)
     tec_anio_ingreso = models.CharField(max_length=30)
+    tec_descripcion = models.CharField(max_length=50, blank=True, null=True, default=None)
     tec_encargado = models.ForeignKey('Usuario', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_loc = models.ForeignKey('Localizacion', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_cat = models.ForeignKey('Categoria', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_dep = models.ForeignKey('Dependencia', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    tec_mar = models.ForeignKey('Marca',on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_eliminado = models.CharField(max_length=20,default="no")
 
     class Meta:

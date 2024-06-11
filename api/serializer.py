@@ -52,6 +52,11 @@ class DetalleCategoriaSerializer(serializers.ModelSerializer):
         model = DetalleCategoria
         fields = '__all__'
 
+class MarcaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Marca
+        fields = '__all__'
+
 class DependenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dependencia
@@ -60,19 +65,21 @@ class DependenciaSerializer(serializers.ModelSerializer):
 class ComponenteSerializer(serializers.ModelSerializer):
     dep_nombre = serializers.CharField(source='com_dep.dep_nombre',read_only=True)
     det_cat_nombre = serializers.CharField(source='com_det_cat.det_cat_nombre',read_only=True)
+    mar_nombre = serializers.CharField(source='com_mar.mar_nombre',read_only=True)
     class Meta:
         model = Componente
-        fields = ['com_id','com_serie','com_codigo_bien','com_codigo_uta','com_modelo','com_marca','com_caracteristica','com_anio_ingreso','com_eliminado','com_det_cat','com_dep','dep_nombre','det_cat_nombre']
+        fields = ['com_id','com_serie','com_codigo_bien','com_codigo_uta','com_modelo','com_caracteristica','com_anio_ingreso','com_estado','com_mar','com_eliminado','com_det_cat','com_dep','dep_nombre','det_cat_nombre','mar_nombre']
 
 class InmobiliarioSerializer(serializers.ModelSerializer):
     usu_nombres = serializers.CharField(source='inm_encargado.usu_nombres',read_only=True)
     usu_apellidos = serializers.CharField(source='inm_encargado.usu_apellidos',read_only=True)
     cat_nombre = serializers.CharField(source='inm_cat.cat_nombre',read_only=True)
     dep_nombre = serializers.CharField(source='inm_dep.dep_nombre',read_only=True)
+    mar_nombre = serializers.CharField(source='inm_mar.mar_nombre',read_only=True)
 
     class Meta:
         model = Inmobiliario
-        fields = ['inm_id','inm_codigo','inm_cat','inm_dep','inm_serie','inm_modelo','inm_marca','inm_encargado','inm_anio_ingreso','usu_nombres','usu_apellidos','cat_nombre','dep_nombre']
+        fields = ['inm_id','inm_codigo','inm_cat','inm_dep','inm_serie','inm_modelo','inm_mar','inm_descripcion','inm_encargado','inm_anio_ingreso','usu_nombres','usu_apellidos','cat_nombre','dep_nombre','mar_nombre']
 
 
 class TecnologicoSerializer(serializers.ModelSerializer):
@@ -80,9 +87,10 @@ class TecnologicoSerializer(serializers.ModelSerializer):
     cat_nombre = serializers.CharField(source='tec_cat.cat_nombre', read_only=True)
     dep_nombre = serializers.CharField(source='tec_dep.dep_nombre', read_only=True)
     loc_nombre = serializers.CharField(source='tec_loc.loc_nombre', read_only=True)
+    mar_nombre = serializers.CharField(source='tec_mar.mar_nombre',read_only=True)
     class Meta:
         model = Tecnologico
-        fields = ['tec_id','tec_codigo','tec_serie','tec_modelo','tec_marca','tec_ip','tec_anio_ingreso','tec_encargado','tec_loc','tec_cat','tec_dep','tec_eliminado','usu_nombres','cat_nombre','dep_nombre','loc_nombre']
+        fields = ['tec_id','tec_codigo','tec_serie','tec_modelo','tec_mar','tec_ip','tec_anio_ingreso','tec_descripcion','tec_encargado','tec_loc','tec_cat','tec_dep','tec_eliminado','usu_nombres','cat_nombre','dep_nombre','loc_nombre','mar_nombre']
 
 class DetalleTecnologicoSerializer(serializers.ModelSerializer):
     class Meta:
