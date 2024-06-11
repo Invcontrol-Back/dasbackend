@@ -117,6 +117,15 @@ class DetalleCategoria(models.Model):
         managed = False
         db_table = 'categoriadetalle'
 
+class Marca(models.Model):
+    mar_id = models.AutoField(primary_key=True)
+    mar_nombre = models.CharField(max_length=30)
+    mar_eliminado = models.CharField(max_length=20,default="no")
+
+    class Meta:
+        managed = False
+        db_table = 'marca'
+
 class Componente(models.Model):
     com_id = models.AutoField(primary_key=True)
     com_serie = models.CharField(max_length=30)

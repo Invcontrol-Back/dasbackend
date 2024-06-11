@@ -282,6 +282,24 @@ class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return DetalleCategoria.objects.filter(det_cat_eliminado="no",det_cat_cat__cat_eliminado="no")
     
+class MarcaViewSet(viewsets.ModelViewSet):
+    queryset = Marca.objects.all()
+    serializer_class = MarcaSerializer
+
+    def get_queryset(self):
+        return Marca.objects.filter(mar_eliminado="no")
+
+    def destroy(self, request, *args, **kwargs):
+            
+        id = kwargs.get('pk')
+        try:
+            marca = Marca.objects.get(mar_id=id)
+            marca.mar_eliminado = "si"
+            marca.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Marca.DoesNotExist:
+            return Response({'error': 'Marca no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 class DependenciaViewSet(viewsets.ModelViewSet):
     queryset = Dependencia.objects.all()
     serializer_class = DependenciaSerializer
