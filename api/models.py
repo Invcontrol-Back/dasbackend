@@ -176,13 +176,14 @@ class Tecnologico(models.Model):
     tec_codigo = models.CharField(max_length=30)
     tec_serie = models.CharField(max_length=30)
     tec_modelo = models.CharField(max_length=30)
-    tec_marca = models.CharField(max_length=30)
     tec_ip = models.CharField(max_length=30, blank=True, null=True, default=None)
     tec_anio_ingreso = models.CharField(max_length=30)
+    tec_descripcion = models.CharField(max_length=50, blank=True, null=True, default=None)
     tec_encargado = models.ForeignKey('Usuario', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_loc = models.ForeignKey('Localizacion', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_cat = models.ForeignKey('Categoria', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_dep = models.ForeignKey('Dependencia', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    tec_mar = models.ForeignKey('Marca',on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     tec_eliminado = models.CharField(max_length=20,default="no")
 
     class Meta:
