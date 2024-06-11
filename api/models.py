@@ -133,10 +133,11 @@ class Componente(models.Model):
     com_codigo_uta = models.CharField(max_length=30,default=None,null=True,blank=True)
     com_det_cat = models.ForeignKey('DetalleCategoria', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     com_modelo = models.CharField(max_length=30)
-    com_marca = models.CharField(max_length=30)
     com_caracteristica = models.CharField(max_length=30)
     com_dep = models.ForeignKey('Dependencia', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     com_anio_ingreso = models.CharField(max_length=30)
+    com_estado = models.CharField(max_length=30)
+    com_mar = models.ForeignKey('Marca',on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     com_eliminado = models.CharField(max_length=30,default="no")
 
     class Meta:

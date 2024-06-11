@@ -65,9 +65,10 @@ class DependenciaSerializer(serializers.ModelSerializer):
 class ComponenteSerializer(serializers.ModelSerializer):
     dep_nombre = serializers.CharField(source='com_dep.dep_nombre',read_only=True)
     det_cat_nombre = serializers.CharField(source='com_det_cat.det_cat_nombre',read_only=True)
+    mar_nombre = serializers.CharField(source='com_mar.mar_nombre',read_only=True)
     class Meta:
         model = Componente
-        fields = ['com_id','com_serie','com_codigo_bien','com_codigo_uta','com_modelo','com_marca','com_caracteristica','com_anio_ingreso','com_eliminado','com_det_cat','com_dep','dep_nombre','det_cat_nombre']
+        fields = ['com_id','com_serie','com_codigo_bien','com_codigo_uta','com_modelo','com_caracteristica','com_anio_ingreso','com_estado','com_mar','com_eliminado','com_det_cat','com_dep','dep_nombre','det_cat_nombre','mar_nombre']
 
 class InmobiliarioSerializer(serializers.ModelSerializer):
     usu_nombres = serializers.CharField(source='inm_encargado.usu_nombres',read_only=True)
