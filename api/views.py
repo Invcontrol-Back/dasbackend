@@ -463,7 +463,7 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             id_marca = request.data.get('tec_mar')
             marca = Marca.objects.get(mar_id=id_marca)
 
-            Tecnologico.objects.filter(tec_loc=nueva_etiqueta).update(tec_loc=None)
+            Tecnologico.objects.filter(tec_loc_id=nueva_etiqueta).update(tec_loc_id=None)
             tecnologico_anterior.tec_loc_id = nueva_etiqueta
             tecnologico_anterior.tec_anio_ingreso = request.data.get('tec_anio_ingreso')
             tecnologico_anterior.tec_cat = categoria
