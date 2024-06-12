@@ -550,17 +550,37 @@ class DetalleTecnologicoViewSet(viewsets.ModelViewSet):
 
 class ComponenteDetalleView(APIView):
     def get(self, request):
-        parametro = self.request.query_params.get('parametro', None)
+        parametro = request.query_params.get('parametro', None)
         
         if parametro is not None:
-            with connection.cursor() as cursor:
-                cursor.execute("CALL obtenerComponentesTecnologicos(%s)", [parametro])
-                columns = [col[0] for col in cursor.description]
-                results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-                return Response(results)
-        else:
-            return Response({"error": "Parámetro 'parametro' no proporcionado."})
+            detalles = DetalleTecnologico.objects.filter(det_tec_tec_id=parametro)
+            response_data = []
+            
+            for detalle in detalles:
+                try:
+                    componente_anterior = Componente.objects.get(com_id=detalle.det_tec_com_adquirido_id)
+                except Componente.DoesNotExist:
+                    componente_anterior = None
+
+                try:
+                    componente_nuevo = Componente.objects.get(com_id=detalle.det_tec_com_uso_id)
+                except Componente.DoesNotExist:
+                    componente_nuevo = None
+                
+                detalle_data = {
+                    'detalle': DetalleTecnologicoSerializer(detalle).data,
+                    'componenteAnterior': ComponenteSerializer(componente_anterior).data if componente_anterior else None,
+                    'componenteNuevo': ComponenteSerializer(componente_nuevo).data if componente_nuevo else None,
+                }
+                response_data.append(detalle_data)
+            
+            return Response(response_data, status=status.HTTP_200_OK)
         
+        return Response({'error': 'Parámetro no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
+                    #with connection.cursor() as cursor:
+                #cursor.execute("CALL obtenerComponentesTecnologicos(%s)", [parametro])
+                #columns = [col[0] for col in cursor.description]
+                #results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 class ReporteDetalleView(viewsets.ModelViewSet):
     queryset = DetalleTecnologico.objects.all()
     serializer_class = DetalleTecnologicoSerializer
