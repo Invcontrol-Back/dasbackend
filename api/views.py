@@ -554,8 +554,7 @@ class ComponenteDetalleView(APIView):
         
         if parametro is not None:
             detalles = DetalleTecnologico.objects.filter(det_tec_tec_id=parametro)
-            response_data = []
-            
+            detalle_data = []
             for detalle in detalles:
                 try:
                     componente_anterior = Componente.objects.get(com_id=detalle.det_tec_com_adquirido_id)
@@ -567,14 +566,12 @@ class ComponenteDetalleView(APIView):
                 except Componente.DoesNotExist:
                     componente_nuevo = None
                 
-                detalle_data = {
-                    'detalle': DetalleTecnologicoSerializer(detalle).data,
-                    'componenteAnterior': ComponenteSerializer(componente_anterior).data if componente_anterior else None,
-                    'componenteNuevo': ComponenteSerializer(componente_nuevo).data if componente_nuevo else None,
-                }
-                response_data.append(detalle_data)
+                detalle = DetalleTecnologicoSerializer(detalle).data
+                detalle['componenteAnterior'] =ComponenteSerializer(componente_anterior).data if componente_anterior else None 
+                detalle['componenteNuevo'] = ComponenteSerializer(componente_nuevo).data if componente_nuevo else None
+                detalle_data.append(detalle)
             
-            return Response(response_data, status=status.HTTP_200_OK)
+            return Response(detalle_data, status=status.HTTP_200_OK)
         
         return Response({'error': 'Parámetro no proporcionado'}, status=status.HTTP_400_BAD_REQUEST)
                     #with connection.cursor() as cursor:
