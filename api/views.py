@@ -447,6 +447,9 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             id_usuario = request.data.get('tec_encargado')
             usuario = Usuario.objects.get(usu_id=id_usuario)
 
+            id_marca = request.data.get('tec_mar')
+            marca = Marca.objects.get(mar_id=id_marca)
+
             Tecnologico.objects.filter(tec_loc=nueva_etiqueta).update(tec_loc=None)
             tecnologico_anterior.tec_loc_id = nueva_etiqueta
             tecnologico_anterior.tec_anio_ingreso = request.data.get('tec_anio_ingreso')
@@ -455,9 +458,10 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             tecnologico_anterior.tec_dep = dependencia
             tecnologico_anterior.tec_encargado = usuario
             tecnologico_anterior.tec_ip = request.data.get('tec_ip')
-            tecnologico_anterior.tec_marca = request.data.get('tec_marca')
+            tecnologico_anterior.tec_mar = marca
             tecnologico_anterior.tec_modelo = request.data.get('tec_modelo')
             tecnologico_anterior.tec_serie = request.data.get('tec_serie')
+            tecnologico_anterior.tec_descripcion = request.data.get('tec_descripcion')
             
 
             tecnologico_anterior.save()
