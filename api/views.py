@@ -426,8 +426,21 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         try:
-            with connection.cursor() as cursor:
-                cursor.callproc('eliminarTecnologico', [instance.tec_id])
+            tecnologico = Tecnologico.objects.get(tec_id=instance.tec_id)  # Obtener el objeto individual, no el queryset
+            tecnologico.tec_eliminado = "si"  # Actualizar el campo directamente en el objeto
+            tecnologico.save()  # Guardar los cambios en la base de datos
+
+            detalleComponentes = DetalleTecnologico.objects.filter(det_tec_tec_id=tecnologico.tec_id)
+            detalleComponentes.update(det_tec_eliminado="si")
+
+            for detalle in detalleComponentes:
+            # Obtener el ID del componente desde el objeto detalle
+                com_id = detalle.det_tec_com_uso_id
+                Componente.objects.filter(com_id=com_id).update(com_eliminado="si")
+
+        #with connection.cursor() as cursor:
+        #    cursor.callproc('eliminarTecnologico', [instance.tec_id])
+
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
