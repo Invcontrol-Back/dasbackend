@@ -428,6 +428,7 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
         try:
             tecnologico = Tecnologico.objects.get(tec_id=instance.tec_id)  # Obtener el objeto individual, no el queryset
             tecnologico.tec_eliminado = "si"  # Actualizar el campo directamente en el objeto
+            tecnologico.tec_loc = None
             tecnologico.save()  # Guardar los cambios en la base de datos
 
             detalleComponentes = DetalleTecnologico.objects.filter(det_tec_tec_id=tecnologico.tec_id)
