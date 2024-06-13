@@ -88,10 +88,12 @@ class TecnologicoSerializer(serializers.ModelSerializer):
     cat_nombre = serializers.CharField(source='tec_cat.cat_nombre', read_only=True)
     dep_nombre = serializers.CharField(source='tec_dep.dep_nombre', read_only=True)
     loc_nombre = serializers.CharField(source='tec_loc.loc_nombre', read_only=True)
+    ubi_nombre = serializers.CharField(source='tec_loc.loc_ubi.ubi_nombre', read_only=True)
+    blo_nombre = serializers.CharField(source='tec_loc.loc_ubi.ubi_blo.blo_nombre', read_only=True)
     mar_nombre = serializers.CharField(source='tec_mar.mar_nombre',read_only=True)
     class Meta:
         model = Tecnologico
-        fields = ['tec_id','tec_codigo','tec_serie','tec_modelo','tec_mar','tec_ip','tec_anio_ingreso','tec_descripcion','tec_encargado','tec_loc','tec_cat','tec_dep','tec_eliminado','usu_nombres','usu_apellidos','cat_nombre','dep_nombre','loc_nombre','mar_nombre']
+        fields = ['tec_id','tec_codigo','tec_serie','tec_modelo','tec_mar','tec_ip','tec_anio_ingreso','tec_descripcion','tec_encargado','tec_loc','tec_cat','tec_dep','tec_eliminado','usu_nombres','usu_apellidos','cat_nombre','dep_nombre','loc_nombre','mar_nombre','ubi_nombre','blo_nombre']
 
 class DetalleTecnologicoSerializer(serializers.ModelSerializer):
     class Meta:
