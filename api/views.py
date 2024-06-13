@@ -604,26 +604,71 @@ class ReporteDetalleView(viewsets.ModelViewSet):
         
     @action(detail=False, methods=['get'])
     def reporte_tecnologico_general(self, request):
-        results = self.execute_procedure('reporteTecnologicoGeneral',[])
-        return Response(results)
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no")
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
     
     @action(detail=False, methods=['get'])
     def reporte_tecnologico_encargado(self, request):
         encargado_id = request.query_params.get('encargado', None)
-        if encargado_id is not None:
-            results = self.execute_procedure('ObtenerTecnologicosPorEncargado', [encargado_id])
-            return Response(results)
-        else:
-            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no",tec_encargado=encargado_id)
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
         
     @action(detail=False, methods=['get'])
     def reporte_tecnologico_ubicacion(self, request):
         ubicacion_id = request.query_params.get('ubicacion', None)
-        if ubicacion_id is not None:
-            results = self.execute_procedure('ObtenerTecnologicosPorUbicacion', [ubicacion_id])
-            return Response(results)
-        else:
-            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no",tec_loc_id__loc_ubi_id=ubicacion_id)
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
         
     @action(detail=False, methods=['get'])
     def estadistica_software(self, request):
