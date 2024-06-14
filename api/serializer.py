@@ -48,10 +48,11 @@ class CategoriaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class DetalleCategoriaSerializer(serializers.ModelSerializer):
+    cat_nombre = serializers.CharField(source='det_cat_cat.cat_nombre',read_only=True)
     class Meta:
         model = DetalleCategoria
-        fields = '__all__'
-
+        fields = ['det_cat_id','det_cat_nombre','det_cat_eliminado','det_cat_cat','cat_nombre']
+        
 class MarcaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Marca
