@@ -678,7 +678,29 @@ class ReporteDetalleView(viewsets.ModelViewSet):
             tecnologicos_data.append(tecnologico_data)
 
         return Response(tecnologicos_data)
-        
+
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_ditic(self, request):
+        tecnologicos = Tecnologico.objects.filter(tec_cat_id__cat_nombre='COMPUTADOR DE ESCRITORIO')
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
+
     @action(detail=False, methods=['get'])
     def estadistica_software(self, request):
         queryset = Software.objects.all()
