@@ -144,6 +144,16 @@ class Componente(models.Model):
         managed = False
         db_table = 'componente'
 
+class Localizacion(models.Model):
+    loc_id = models.AutoField(primary_key=True)
+    loc_nombre = models.CharField(max_length=30)
+    loc_ubi = models.ForeignKey('Ubicacion', on_delete=models.DO_NOTHING)
+    loc_eliminado = models.CharField(max_length=20,default="no")
+
+    class Meta:
+        managed = False
+        db_table = 'localizacion'
+
 class Inmobiliario(models.Model):
     inm_id = models.AutoField(primary_key=True)
     inm_codigo = models.CharField(unique=True, max_length=30)
@@ -154,22 +164,16 @@ class Inmobiliario(models.Model):
     inm_dep = models.ForeignKey(Dependencia, models.DO_NOTHING, blank=True, null=True)
     inm_encargado = models.ForeignKey('Usuario', models.DO_NOTHING, blank=True, null=True)
     inm_mar = models.ForeignKey('Marca',on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    inm_loc = models.ForeignKey('Localizacion', on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     inm_anio_ingreso = models.CharField(max_length=30,blank=True, null=True)
     inm_eliminado = models.CharField(max_length=20)
+    
 
     class Meta:
         managed = False
         db_table = 'inmobiliario'
 
-class Localizacion(models.Model):
-    loc_id = models.AutoField(primary_key=True)
-    loc_nombre = models.CharField(max_length=30)
-    loc_ubi = models.ForeignKey('Ubicacion', on_delete=models.DO_NOTHING)
-    loc_eliminado = models.CharField(max_length=20,default="no")
 
-    class Meta:
-        managed = False
-        db_table = 'localizacion'
 
 class Tecnologico(models.Model):
     tec_id = models.AutoField(primary_key=True)
