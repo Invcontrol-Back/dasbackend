@@ -359,6 +359,12 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
         id = kwargs.get('pk')
         try:
             inmueble = Inmobiliario.objects.get(inm_id=id)
+
+            inmueble.inm_cat = None
+            inmueble.inm_encargado = None
+            inmueble.inm_mar = None
+            inmueble.inm_loc = None
+            
             inmueble.inm_eliminado = "si"
             inmueble.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -429,6 +435,9 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             tecnologico = Tecnologico.objects.get(tec_id=instance.tec_id)  # Obtener el objeto individual, no el queryset
             tecnologico.tec_eliminado = "si"  # Actualizar el campo directamente en el objeto
             tecnologico.tec_loc = None
+            tecnologico.tec_encargado = None
+            tecnologico.tec_cat = None
+            tecnologico.tec_mar = None
             tecnologico.save()  # Guardar los cambios en la base de datos
 
             detalleComponentes = DetalleTecnologico.objects.filter(det_tec_tec_id=tecnologico.tec_id)
