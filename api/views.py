@@ -275,6 +275,21 @@ class CategoriaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Categoria.objects.filter(cat_eliminado="no")
+    
+    def destroy(self, request, *args, **kwargs):
+            
+        id = kwargs.get('pk')
+        try:
+            categoria = Categoria.objects.get(cat_id=id)
+            categoria.cat_eliminado = "si"
+            Tecnologico.objects.filter(tec_cat_id=categoria.cat_id).update(tec_cat=None)
+            Inmobiliario.objects.filter(inm_cat_id=categoria.cat_id).update(inm_cat=None)
+            Componente.objects.filter(com_det_cat_id__det_cat_cat_id=categoria.cat_id).update(com_det_cat=None)
+            DetalleCategoria.objects.filter(det_cat_cat_id=categoria.cat_id).update(det_cat_eliminado="si")
+            categoria.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Marca.DoesNotExist:
+            return Response({'error': 'Marca no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     queryset = DetalleCategoria.objects.all()
@@ -283,6 +298,18 @@ class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return DetalleCategoria.objects.filter(det_cat_eliminado="no",det_cat_cat__cat_eliminado="no")
     
+    def destroy(self, request, *args, **kwargs):
+            
+        id = kwargs.get('pk')
+        try:
+            subcategoria = DetalleCategoria.objects.get(det_cat_id=id)
+            subcategoria.det_cat_eliminado = "si"
+            Componente.objects.filter(com_det_cat_id=subcategoria.det_cat_id).update(com_det_cat=None)
+            subcategoria.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Marca.DoesNotExist:
+            return Response({'error': 'Marca no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 class MarcaViewSet(viewsets.ModelViewSet):
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
@@ -296,6 +323,9 @@ class MarcaViewSet(viewsets.ModelViewSet):
         try:
             marca = Marca.objects.get(mar_id=id)
             marca.mar_eliminado = "si"
+            Tecnologico.objects.filter(tec_mar_id=marca.mar_id).update(tec_mar=None)
+            Inmobiliario.objects.filter(inm_mar_id=marca.mar_id).update(inm_mar=None)
+            Componente.objects.filter(com_mar_id=marca.mar_id).update(com_mar=None)
             marca.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Marca.DoesNotExist:
