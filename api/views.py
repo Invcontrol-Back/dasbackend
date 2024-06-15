@@ -1,4 +1,5 @@
 from django.db.models import F
+from django.db.models import Q
 from rest_framework import viewsets
 from .serializer import *
 from rest_framework.views import APIView
@@ -274,6 +275,21 @@ class CategoriaViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Categoria.objects.filter(cat_eliminado="no")
+    
+    def destroy(self, request, *args, **kwargs):
+            
+        id = kwargs.get('pk')
+        try:
+            categoria = Categoria.objects.get(cat_id=id)
+            categoria.cat_eliminado = "si"
+            Tecnologico.objects.filter(tec_cat_id=categoria.cat_id).update(tec_cat=None)
+            Inmobiliario.objects.filter(inm_cat_id=categoria.cat_id).update(inm_cat=None)
+            Componente.objects.filter(com_det_cat_id__det_cat_cat_id=categoria.cat_id).update(com_det_cat=None)
+            DetalleCategoria.objects.filter(det_cat_cat_id=categoria.cat_id).update(det_cat_eliminado="si")
+            categoria.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Marca.DoesNotExist:
+            return Response({'error': 'Marca no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     queryset = DetalleCategoria.objects.all()
@@ -282,6 +298,18 @@ class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return DetalleCategoria.objects.filter(det_cat_eliminado="no",det_cat_cat__cat_eliminado="no")
     
+    def destroy(self, request, *args, **kwargs):
+            
+        id = kwargs.get('pk')
+        try:
+            subcategoria = DetalleCategoria.objects.get(det_cat_id=id)
+            subcategoria.det_cat_eliminado = "si"
+            Componente.objects.filter(com_det_cat_id=subcategoria.det_cat_id).update(com_det_cat=None)
+            subcategoria.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Marca.DoesNotExist:
+            return Response({'error': 'Marca no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
 class MarcaViewSet(viewsets.ModelViewSet):
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
@@ -295,6 +323,9 @@ class MarcaViewSet(viewsets.ModelViewSet):
         try:
             marca = Marca.objects.get(mar_id=id)
             marca.mar_eliminado = "si"
+            Tecnologico.objects.filter(tec_mar_id=marca.mar_id).update(tec_mar=None)
+            Inmobiliario.objects.filter(inm_mar_id=marca.mar_id).update(inm_mar=None)
+            Componente.objects.filter(com_mar_id=marca.mar_id).update(com_mar=None)
             marca.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Marca.DoesNotExist:
@@ -359,6 +390,12 @@ class InmobiliarioViewSet(viewsets.ModelViewSet):
         id = kwargs.get('pk')
         try:
             inmueble = Inmobiliario.objects.get(inm_id=id)
+
+            inmueble.inm_cat = None
+            inmueble.inm_encargado = None
+            inmueble.inm_mar = None
+            inmueble.inm_loc = None
+            
             inmueble.inm_eliminado = "si"
             inmueble.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -429,6 +466,9 @@ class TecnologicoViewSet(viewsets.ModelViewSet):
             tecnologico = Tecnologico.objects.get(tec_id=instance.tec_id)  # Obtener el objeto individual, no el queryset
             tecnologico.tec_eliminado = "si"  # Actualizar el campo directamente en el objeto
             tecnologico.tec_loc = None
+            tecnologico.tec_encargado = None
+            tecnologico.tec_cat = None
+            tecnologico.tec_mar = None
             tecnologico.save()  # Guardar los cambios en la base de datos
 
             detalleComponentes = DetalleTecnologico.objects.filter(det_tec_tec_id=tecnologico.tec_id)
@@ -604,27 +644,158 @@ class ReporteDetalleView(viewsets.ModelViewSet):
         
     @action(detail=False, methods=['get'])
     def reporte_tecnologico_general(self, request):
-        results = self.execute_procedure('reporteTecnologicoGeneral',[])
-        return Response(results)
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no")
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
     
     @action(detail=False, methods=['get'])
     def reporte_tecnologico_encargado(self, request):
         encargado_id = request.query_params.get('encargado', None)
-        if encargado_id is not None:
-            results = self.execute_procedure('ObtenerTecnologicosPorEncargado', [encargado_id])
-            return Response(results)
-        else:
-            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no",tec_encargado=encargado_id)
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
         
     @action(detail=False, methods=['get'])
     def reporte_tecnologico_ubicacion(self, request):
         ubicacion_id = request.query_params.get('ubicacion', None)
-        if ubicacion_id is not None:
-            results = self.execute_procedure('ObtenerTecnologicosPorUbicacion', [ubicacion_id])
-            return Response(results)
-        else:
-            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
-        
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no",tec_loc_id__loc_ubi_id=ubicacion_id)
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
+
+    @action(detail=False, methods=['get'])
+    def reporte_tecnologico_ditic(self, request):
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no",tec_cat_id__cat_nombre='COMPUTADOR DE ESCRITORIO')
+        tecnologicos_data = []
+
+        for tecnologico in tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            detalle_relacion_data = []
+
+            for detalle in detalle_relacion:
+                componente = Componente.objects.get(com_eliminado="no", com_id=detalle.det_tec_com_uso_id)
+                componente_data = ComponenteSerializer(componente).data
+                detalle_data = DetalleTecnologicoSerializer(detalle).data
+                detalle_data.update(componente_data)
+                detalle_relacion_data.append(detalle_data)
+
+            tecnologico_data = TecnologicoSerializer(tecnologico).data
+            tecnologico_data['detalles'] = detalle_relacion_data
+            tecnologicos_data.append(tecnologico_data)
+
+        return Response(tecnologicos_data)
+
+    @action(detail=False, methods=['get'])
+    def reporte_upe(self, request):
+        ubicaciones = Ubicacion.objects.filter(
+            Q(ubi_nombre__icontains='LABORATORIO') | Q(ubi_nombre__icontains='AULA'),
+            ubi_eliminado='no'
+        )
+
+        resultados = []
+        for ubicacion in ubicaciones:
+            ubicacion_data = {
+                'ubicacion': ubicacion.ubi_nombre,
+                'tecnologicos': [],
+                'inmobiliarios': []
+            }
+
+            bienes_tecnologicos = Tecnologico.objects.filter(
+                tec_eliminado="no",
+                tec_loc_id__loc_ubi_id=ubicacion.ubi_id
+            )
+            for bien in bienes_tecnologicos:
+                ubicacion_data['tecnologicos'].append({
+                    'codigo': bien.tec_id,
+                    'marca': bien.tec_mar.mar_nombre,
+                    'modelo': bien.tec_modelo,
+                    'serie': bien.tec_serie,
+                    'modelo': bien.tec_modelo,
+                    'año_ingreso': bien.tec_anio_ingreso,
+                    'categoria': bien.tec_cat.cat_nombre,
+                    'bloque': bien.tec_loc.loc_ubi.ubi_blo.blo_nombre,
+                    'ubicacion': bien.tec_loc.loc_ubi.ubi_nombre,
+                    'etiqueta': bien.tec_loc.loc_nombre,
+                    'dependencia': bien.tec_dep.dep_nombre,
+                    'encargado': bien.tec_encargado.usu_nombres + ' ' + bien.tec_encargado.usu_apellidos,
+                    'descripcion': bien.tec_descripcion,
+
+                    # Añade más campos según sea necesario
+                })
+
+            bienes_inmobiliarios = Inmobiliario.objects.filter(
+                inm_eliminado="no",
+                inm_loc_id__loc_ubi_id=ubicacion.ubi_id
+            )
+            for bien in bienes_inmobiliarios:
+                ubicacion_data['inmobiliarios'].append({
+                    'codigo': bien.inm_id,
+                    'marca': bien.inm_mar.mar_nombre,
+                    'modelo': bien.inm_modelo,
+                    'serie': bien.inm_serie,
+                    'modelo': bien.inm_modelo,
+                    'año_ingreso': bien.inm_anio_ingreso,
+                    'categoria': bien.inm_cat.cat_nombre,
+                    'bloque': bien.inm_loc.loc_ubi.ubi_blo.blo_nombre,
+                    'ubicacion': bien.inm_loc.loc_ubi.ubi_nombre,
+                    'etiqueta': bien.inm_loc.loc_nombre,
+                    'dependencia': bien.inm_dep.dep_nombre,
+                    'encargado': bien.inm_encargado.usu_nombres + ' ' + bien.inm_encargado.usu_apellidos,
+                    'descripcion': bien.inm_descripcion,
+                    # Añade más campos según sea necesario
+                })
+
+            resultados.append(ubicacion_data)
+
+        return Response(resultados)
+
     @action(detail=False, methods=['get'])
     def estadistica_software(self, request):
         queryset = Software.objects.all()
