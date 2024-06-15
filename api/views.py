@@ -1,4 +1,5 @@
 from django.db.models import F
+from django.db.models import Q
 from rest_framework import viewsets
 from .serializer import *
 from rest_framework.views import APIView
@@ -681,7 +682,7 @@ class ReporteDetalleView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def reporte_tecnologico_ditic(self, request):
-        tecnologicos = Tecnologico.objects.filter(tec_cat_id__cat_nombre='COMPUTADOR DE ESCRITORIO')
+        tecnologicos = Tecnologico.objects.filter(tec_eliminado="no",tec_cat_id__cat_nombre='COMPUTADOR DE ESCRITORIO')
         tecnologicos_data = []
 
         for tecnologico in tecnologicos:
@@ -700,6 +701,70 @@ class ReporteDetalleView(viewsets.ModelViewSet):
             tecnologicos_data.append(tecnologico_data)
 
         return Response(tecnologicos_data)
+
+    @action(detail=False, methods=['get'])
+    def reporte_upe(self, request):
+        ubicaciones = Ubicacion.objects.filter(
+            Q(ubi_nombre__icontains='LABORATORIO') | Q(ubi_nombre__icontains='AULA'),
+            ubi_eliminado='no'
+        )
+
+        resultados = []
+        for ubicacion in ubicaciones:
+            ubicacion_data = {
+                'ubicacion': ubicacion.ubi_nombre,
+                'tecnologicos': [],
+                'inmobiliarios': []
+            }
+
+            bienes_tecnologicos = Tecnologico.objects.filter(
+                tec_eliminado="no",
+                tec_loc_id__loc_ubi_id=ubicacion.ubi_id
+            )
+            for bien in bienes_tecnologicos:
+                ubicacion_data['tecnologicos'].append({
+                    'codigo': bien.tec_id,
+                    'marca': bien.tec_mar.mar_nombre,
+                    'modelo': bien.tec_modelo,
+                    'serie': bien.tec_serie,
+                    'modelo': bien.tec_modelo,
+                    'año_ingreso': bien.tec_anio_ingreso,
+                    'categoria': bien.tec_cat.cat_nombre,
+                    'bloque': bien.tec_loc.loc_ubi.ubi_blo.blo_nombre,
+                    'ubicacion': bien.tec_loc.loc_ubi.ubi_nombre,
+                    'etiqueta': bien.tec_loc.loc_nombre,
+                    'dependencia': bien.tec_dep.dep_nombre,
+                    'encargado': bien.tec_encargado.usu_nombres + ' ' + bien.tec_encargado.usu_apellidos,
+                    'descripcion': bien.tec_descripcion,
+
+                    # Añade más campos según sea necesario
+                })
+
+            bienes_inmobiliarios = Inmobiliario.objects.filter(
+                inm_eliminado="no",
+                inm_loc_id__loc_ubi_id=ubicacion.ubi_id
+            )
+            for bien in bienes_inmobiliarios:
+                ubicacion_data['inmobiliarios'].append({
+                    'codigo': bien.inm_id,
+                    'marca': bien.inm_mar.mar_nombre,
+                    'modelo': bien.inm_modelo,
+                    'serie': bien.inm_serie,
+                    'modelo': bien.inm_modelo,
+                    'año_ingreso': bien.inm_anio_ingreso,
+                    'categoria': bien.inm_cat.cat_nombre,
+                    'bloque': bien.inm_loc.loc_ubi.ubi_blo.blo_nombre,
+                    'ubicacion': bien.inm_loc.loc_ubi.ubi_nombre,
+                    'etiqueta': bien.inm_loc.loc_nombre,
+                    'dependencia': bien.inm_dep.dep_nombre,
+                    'encargado': bien.inm_encargado.usu_nombres + ' ' + bien.inm_encargado.usu_apellidos,
+                    'descripcion': bien.inm_descripcion,
+                    # Añade más campos según sea necesario
+                })
+
+            resultados.append(ubicacion_data)
+
+        return Response(resultados)
 
     @action(detail=False, methods=['get'])
     def estadistica_software(self, request):
