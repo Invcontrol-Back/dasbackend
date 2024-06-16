@@ -206,6 +206,16 @@ class LaboratorioViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)    
 
+    @action(detail=False, methods=['get'])
+    def obtener_laboratorio_tipo(self, request):
+        tipo_ubicacion_id = request.query_params.get('tipo_ubicacion', None)
+        if tipo_ubicacion_id is not None:
+            ubicaciones = Ubicacion.objects.filter(ubi_tip_ubi_id=tipo_ubicacion_id, ubi_eliminado='no')
+            serializer = self.get_serializer(ubicaciones, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
+
 class FacultadViewSet(viewsets.ModelViewSet):
     queryset = Facultad.objects.all()
     serializer_class = FacultadSerializer
