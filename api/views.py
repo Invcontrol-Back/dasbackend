@@ -87,17 +87,17 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def actualizar_bienes_generales(self, request):
         enc_anterior = request.data.get('encargado_anterior')
         enc_nuevo = request.data.get('encargado_nuevo')
-        tecnologicos = request.data.get('tecnologicos')
-        inmobiliarios = request.data.get('inmuebles')
+        tecnologicos = request.data.get('tecnologicos',[])
+        inmobiliarios = request.data.get('inmuebles',[])
 
         if not enc_anterior or not enc_nuevo:
             return Response({'error': 'Debe proporcionar ambos valores: encargado_anterior y encargado_nuevo'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             for tecnologico in tecnologicos:
-                Tecnologico.objects.get(tec_codigo=tecnologico,tec_eliminado='no').update(tec_encargado = enc_nuevo)
+                Tecnologico.objects.filter(tec_codigo=tecnologico,tec_eliminado='no').update(tec_encargado = enc_nuevo)
             for inmueble in inmobiliarios:
-                Inmobiliario.objects.get(inm_codigo=inmueble,inm_eliminado='no').update(inm_encargado = enc_nuevo)
+                Inmobiliario.objects.filter(inm_codigo=inmueble,inm_eliminado='no').update(inm_encargado = enc_nuevo)
             #tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
             #inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
 
