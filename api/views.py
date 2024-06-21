@@ -853,3 +853,31 @@ class ReporteDetalleView(viewsets.ModelViewSet):
             'cantidad_activo': cantidad_activo,
             'cantidad_inactivo': cantidad_inactivo
     })
+
+    @action(detail=False, methods=['get'])
+    def estadistica_categoria_tecnologico(self, request):
+        categorias = Categoria.objects.filter(cat_tipoBien='TECNOLOGICO')
+
+        conteo_categorias = []
+        for categoria in categorias:
+            cantidad = Tecnologico.objects.filter(tec_cat_id=categoria.cat_id).count()
+            conteo_categorias.append({
+                'categoria': categoria.cat_nombre,  # Asumiendo que 'cat_nombre' es un campo en el modelo Categoria
+                'cantidad': cantidad
+            })
+
+        return Response(conteo_categorias)
+    
+    @action(detail=False, methods=['get'])
+    def estadistica_categoria_inmobiliario(self, request):
+        categorias = Categoria.objects.filter(cat_tipoBien='INMOBILIARIO')
+
+        conteo_categorias = []
+        for categoria in categorias:
+            cantidad = Inmobiliario.objects.filter(inm_cat_id=categoria.cat_id).count()
+            conteo_categorias.append({
+                'categoria': categoria.cat_nombre,  # Asumiendo que 'cat_nombre' es un campo en el modelo Categoria
+                'cantidad': cantidad
+            })
+
+        return Response(conteo_categorias)
