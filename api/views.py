@@ -87,18 +87,21 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def actualizar_bienes_generales(self, request):
         enc_anterior = request.data.get('encargado_anterior')
         enc_nuevo = request.data.get('encargado_nuevo')
+        tecnologicos = request.data.get('tecnologicos',[])
+        inmobiliarios = request.data.get('inmuebles',[])
 
         if not enc_anterior or not enc_nuevo:
             return Response({'error': 'Debe proporcionar ambos valores: encargado_anterior y encargado_nuevo'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
-            inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
+            for tecnologico in tecnologicos:
+                Tecnologico.objects.filter(tec_codigo=tecnologico,tec_eliminado='no').update(tec_encargado = enc_nuevo)
+            for inmueble in inmobiliarios:
+                Inmobiliario.objects.filter(inm_codigo=inmueble,inm_eliminado='no').update(inm_encargado = enc_nuevo)
+            #tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
+            #inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
 
-            return Response({
-                'tecnologico_actualizado': tecnologico_actualizado,
-                'inmobiliario_actualizado': inmobiliario_actualizado
-            }, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -856,11 +859,11 @@ class ReporteDetalleView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def estadistica_categoria_tecnologico(self, request):
-        categorias = Categoria.objects.filter(cat_tipoBien='TECNOLOGICO')
+        categorias = Categoria.objects.filter(cat_tipoBien='TECNOLOGICO',cat_eliminado='no')
 
         conteo_categorias = []
         for categoria in categorias:
-            cantidad = Tecnologico.objects.filter(tec_cat_id=categoria.cat_id).count()
+            cantidad = Tecnologico.objects.filter(tec_cat_id=categoria.cat_id,tec_eliminado='no').count()
             conteo_categorias.append({
                 'categoria': categoria.cat_nombre,  # Asumiendo que 'cat_nombre' es un campo en el modelo Categoria
                 'cantidad': cantidad
@@ -870,14 +873,41 @@ class ReporteDetalleView(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def estadistica_categoria_inmobiliario(self, request):
-        categorias = Categoria.objects.filter(cat_tipoBien='INMOBILIARIO')
+        categorias = Categoria.objects.filter(cat_tipoBien='INMOBILIARIO',cat_eliminado='no')
 
         conteo_categorias = []
         for categoria in categorias:
-            cantidad = Inmobiliario.objects.filter(inm_cat_id=categoria.cat_id).count()
+            cantidad = Inmobiliario.objects.filter(inm_cat_id=categoria.cat_id,inm_eliminado='no').count()
             conteo_categorias.append({
                 'categoria': categoria.cat_nombre,  # Asumiendo que 'cat_nombre' es un campo en el modelo Categoria
                 'cantidad': cantidad
             })
 
         return Response(conteo_categorias)
+    
+    @action(detail=False,methods=['get'])
+    def reporte_tecnologico_necesidades(self,request):
+        ubicacion_id = request.query_params.get('ubicacion', None)
+
+        bienes_tecnologicos = Tecnologico.objects.filter(tec_loc_id__loc_ubi_id=ubicacion_id,tec_eliminado='no')
+        necesidades = []
+
+        for tecnologico in bienes_tecnologicos:
+            detalle_relacion = DetalleTecnologico.objects.filter(det_tec_eliminado="no", det_tec_tec_id=tecnologico.tec_id)
+            subcategorias = DetalleCategoria.objects.filter(det_cat_cat_id=tecnologico.tec_cat,det_cat_eliminado='no')
+            no_encontrados = []
+            for subcategoria in subcategorias:
+                encontrado = 0
+                for detalle in detalle_relacion:
+                    componente = Componente.objects.get(com_id=detalle.det_tec_com_uso_id,com_estado='ACTIVO',com_eliminado='no')
+                    if componente.com_det_cat_id == subcategoria.det_cat_id:
+                        encontrado = 0
+                if encontrado == 0:
+                    no_encontrados.append(subcategoria.det_cat_nombre)
+            necesidades.append({
+                "codigo":tecnologico.tec_codigo,
+                "nombre":tecnologico.tec_cat.cat_nombre,
+                "etiqueta": tecnologico.tec_loc.loc_nombre,
+                "componentes":no_encontrados
+            })
+        return Response(necesidades)
