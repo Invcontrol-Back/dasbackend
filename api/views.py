@@ -87,18 +87,21 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def actualizar_bienes_generales(self, request):
         enc_anterior = request.data.get('encargado_anterior')
         enc_nuevo = request.data.get('encargado_nuevo')
+        tecnologicos = request.data.get('tecnologicos')
+        inmobiliarios = request.data.get('inmuebles')
 
         if not enc_anterior or not enc_nuevo:
             return Response({'error': 'Debe proporcionar ambos valores: encargado_anterior y encargado_nuevo'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
-            inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
+            for tecnologico in tecnologicos:
+                Tecnologico.objects.get(tec_codigo=tecnologico).update(tec_encargado = enc_nuevo)
+            for inmueble in inmobiliarios:
+                Inmobiliario.objects.get(inm_codigo=inmueble).update(inm_encargado = enc_nuevo)
+            #tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
+            #inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
 
-            return Response({
-                'tecnologico_actualizado': tecnologico_actualizado,
-                'inmobiliario_actualizado': inmobiliario_actualizado
-            }, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
