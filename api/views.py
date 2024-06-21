@@ -856,11 +856,11 @@ class ReporteDetalleView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def estadistica_categoria_tecnologico(self, request):
-        categorias = Categoria.objects.filter(cat_tipoBien='TECNOLOGICO')
+        categorias = Categoria.objects.filter(cat_tipoBien='TECNOLOGICO',cat_eliminado='no')
 
         conteo_categorias = []
         for categoria in categorias:
-            cantidad = Tecnologico.objects.filter(tec_cat_id=categoria.cat_id).count()
+            cantidad = Tecnologico.objects.filter(tec_cat_id=categoria.cat_id,tec_eliminado='no').count()
             conteo_categorias.append({
                 'categoria': categoria.cat_nombre,  # Asumiendo que 'cat_nombre' es un campo en el modelo Categoria
                 'cantidad': cantidad
@@ -870,11 +870,11 @@ class ReporteDetalleView(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def estadistica_categoria_inmobiliario(self, request):
-        categorias = Categoria.objects.filter(cat_tipoBien='INMOBILIARIO')
+        categorias = Categoria.objects.filter(cat_tipoBien='INMOBILIARIO',cat_eliminado='no')
 
         conteo_categorias = []
         for categoria in categorias:
-            cantidad = Inmobiliario.objects.filter(inm_cat_id=categoria.cat_id).count()
+            cantidad = Inmobiliario.objects.filter(inm_cat_id=categoria.cat_id,inm_eliminado='no').count()
             conteo_categorias.append({
                 'categoria': categoria.cat_nombre,  # Asumiendo que 'cat_nombre' es un campo en el modelo Categoria
                 'cantidad': cantidad
@@ -896,7 +896,7 @@ class ReporteDetalleView(viewsets.ModelViewSet):
             for subcategoria in subcategorias:
                 encontrado = 0
                 for detalle in detalle_relacion:
-                    componente = Componente.objects.get(com_id=detalle.det_tec_com_uso_id,com_estado='ACTIVO')
+                    componente = Componente.objects.get(com_id=detalle.det_tec_com_uso_id,com_estado='ACTIVO',com_eliminado='no')
                     if componente.com_det_cat_id == subcategoria.det_cat_id:
                         encontrado = 0
                 if encontrado == 0:
