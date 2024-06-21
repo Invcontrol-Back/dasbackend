@@ -95,9 +95,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
         try:
             for tecnologico in tecnologicos:
-                Tecnologico.objects.get(tec_codigo=tecnologico).update(tec_encargado = enc_nuevo)
+                Tecnologico.objects.get(tec_codigo=tecnologico,tec_eliminado='no').update(tec_encargado = enc_nuevo)
             for inmueble in inmobiliarios:
-                Inmobiliario.objects.get(inm_codigo=inmueble).update(inm_encargado = enc_nuevo)
+                Inmobiliario.objects.get(inm_codigo=inmueble,inm_eliminado='no').update(inm_encargado = enc_nuevo)
             #tecnologico_actualizado = Tecnologico.objects.filter(tec_encargado=enc_anterior).update(tec_encargado=enc_nuevo)
             #inmobiliario_actualizado = Inmobiliario.objects.filter(inm_encargado=enc_anterior).update(inm_encargado=enc_nuevo)
 
