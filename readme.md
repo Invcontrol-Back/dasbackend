@@ -135,15 +135,15 @@ _Vista previa de Django_
 _API Usuarios_
 
 * Post
-[![alt text](image.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/post.png?raw=true)
+![alt text](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/post.png?raw=true)
 
 * Get
-[![alt text](image.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/get.png?raw=true)
+![alt text](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/get.png?raw=true)
 
 * Put
-[![alt text](PUT.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/PUT.png?raw=true)
+![alt text](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/PUT.png?raw=true)
 * Delete
-[![alt text](delete.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/delete.png?raw=true)
+![alt text](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/delete.png?raw=true)
 ## Wiki 📖
 
 Puedes encontrar mucho más de cómo utilizar este proyecto en nuestra [InvControl](https://github.com/Invcontrol-Back).
