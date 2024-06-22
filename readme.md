@@ -130,19 +130,20 @@ _Herramientas usadas para el proyecto_
 * 
 ## Ejemplo de los servicios creados 🛠️
 _Vista previa de Django_
-![alt text](<Captura de pantalla 2024-06-22 002558.png>)
+[![alt text](image-1.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/Captura%20de%20pantalla%202024-06-22%20002558.png?raw=true)
 
 _API Usuarios_
 
 * Post
-![alt text](post.png)
+[![alt text](image.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/post.png?raw=true)
 
 * Get
-![alt text](get.png)
+[![alt text](image.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/get.png?raw=true)
+
 * Put
-![alt text](PUT.png)
+[![alt text](PUT.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/PUT.png?raw=true)
 * Delete
-![alt text](delete.png)
+[![alt text](delete.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/delete.png?raw=true)
 ## Wiki 📖
 
 Puedes encontrar mucho más de cómo utilizar este proyecto en nuestra [InvControl](https://github.com/Invcontrol-Back).
