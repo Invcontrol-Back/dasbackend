@@ -130,7 +130,7 @@ _Herramientas usadas para el proyecto_
 * 
 ## Ejemplo de los servicios creados 🛠️
 _Vista previa de Django_
-[![alt text](image-1.png)](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/Captura%20de%20pantalla%202024-06-22%20002558.png?raw=true)
+![alt text](https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/Captura%20de%20pantalla%202024-06-22%20002558.png?raw=true)
 
 _API Usuarios_
 
