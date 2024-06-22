@@ -129,14 +129,20 @@ _Herramientas usadas para el proyecto_
 * [VS Code ](https://code.visualstudio.com/) - Visual Studio Code es un editor de código fuente desarrollado por Microsoft para Windows, Linux, macOS y Web.
 * 
 ## Ejemplo de los servicios creados 🛠️
+_Vista previa de Django_
+![alt text](<Captura de pantalla 2024-06-22 002558.png>)
 
-_Usuarios_
+_API Usuarios_
 
 * Post
-* Get
-* Put
-* Delete
+![alt text](post.png)
 
+* Get
+![alt text](get.png)
+* Put
+![alt text](PUT.png)
+* Delete
+![alt text](delete.png)
 ## Wiki 📖
 
 Puedes encontrar mucho más de cómo utilizar este proyecto en nuestra [InvControl](https://github.com/Invcontrol-Back).
