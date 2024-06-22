@@ -164,7 +164,7 @@ _Para este proyecto de servicios API fue implementado por dos personas_
 
 * **SEBASTIAN ILBAY RODRIGUEZ** - *Desarrollador Backend - Gestor de Base de Datos* 
 [Git Hub](https://github.com/ATLASSdeveloper)
-* **Kevin Alexander Saquinga** - *Desarrollador Backend* - 
+* **KEVIN ALEXANDER SAQUINGA** - *Desarrollador Backend* - 
 [Git Hub](https://github.com/KEVIN-XTREM-2023)
 
 
