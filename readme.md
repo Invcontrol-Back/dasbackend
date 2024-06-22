@@ -1,4 +1,6 @@
-# LionTeach :tiger:
+<center>
+<img src="https://github.com/Kevin-Saquinga/ImagenesGit/blob/main/LionTech.jpg?raw=true" alt="VB." width="200">
+</center>
 
 _Somos un grupo de trabajo especializado en desarrollo de aplicaciones web y móviles con certificación de calidad y seguridad en cada uno de nuestros productos.._
 _En Liontech, nos inspiramos en el león como símbolo de fuerza, liderazgo y excelencia._
