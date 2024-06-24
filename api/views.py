@@ -897,17 +897,18 @@ class ReporteDetalleView(viewsets.ModelViewSet):
             subcategorias = DetalleCategoria.objects.filter(det_cat_cat_id=tecnologico.tec_cat,det_cat_eliminado='no')
             no_encontrados = []
             for subcategoria in subcategorias:
-                encontrado = 0
+                encontrado = 1
                 for detalle in detalle_relacion:
                     componente = Componente.objects.get(com_id=detalle.det_tec_com_uso_id,com_estado='ACTIVO',com_eliminado='no')
                     if componente.com_det_cat_id == subcategoria.det_cat_id:
                         encontrado = 0
-                if encontrado == 0:
+                if encontrado != 0:
                     no_encontrados.append(subcategoria.det_cat_nombre)
-            necesidades.append({
+            if len(no_encontrados) != 0:
+                necesidades.append({
                 "codigo":tecnologico.tec_codigo,
                 "nombre":tecnologico.tec_cat.cat_nombre,
                 "etiqueta": tecnologico.tec_loc.loc_nombre,
                 "componentes":no_encontrados
-            })
+                })    
         return Response(necesidades)
