@@ -303,6 +303,16 @@ class CategoriaViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Marca.DoesNotExist:
             return Response({'error': 'Marca no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=False, methods=['get'])
+    def recuperar_tipo_categoria(self, request):
+        categoria = request.query_params.get('tipo', None)
+        if categoria is not None:
+            categorias = Categoria.objects.filter(cat_tipoBien=categoria)
+            results = self.get_serializer(categorias, many=True)  # Añadido many=True
+            return Response(results.data)  # Añadido .data para devolver los datos serializados
+        else:
+            return Response({'error': 'Campos faltantes'}, status=status.HTTP_400_BAD_REQUEST)
 
 class DetalleCategoriaViewSet(viewsets.ModelViewSet):
     queryset = DetalleCategoria.objects.all()
