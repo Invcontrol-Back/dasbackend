@@ -308,7 +308,7 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     def recuperar_tipo_categoria(self, request):
         categoria = request.query_params.get('tipo', None)
         if categoria is not None:
-            categorias = Categoria.objects.filter(cat_tipoBien=categoria)
+            categorias = Categoria.objects.filter(cat_tipoBien=categoria,cat_eliminado='no')
             results = self.get_serializer(categorias, many=True)  # Añadido many=True
             return Response(results.data)  # Añadido .data para devolver los datos serializados
         else:
