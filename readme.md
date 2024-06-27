@@ -159,7 +159,7 @@ GitHub es una forja para alojar proyectos utilizando el sistema de control de ve
 
 ## Documentación API :page_with_curl:
 
-Puedes encontrar mla documentacion API de los servicios realizados en el siguiente  [enlace](https://github.com/Invcontrol-Back/dasbackend/tree/main/Documentacion%20API)
+Puedes encontrar la documentación API de los servicios realizados en el siguiente  [enlace](https://github.com/Invcontrol-Back/dasbackend/tree/main/Documentacion%20API)
 
 ## Autores ✒️
 
